@@ -154,6 +154,52 @@ canvas{width:100%;background:#0b0a10;border-radius:6px}
 .hist{font-size:12px}
 .hist div{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--line)}
 .tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:10px;margin-right:4px;background:#333}
+/* ---- 演出 ---- */
+#lcdWrap{transition:box-shadow .3s}
+#lcdWrap.lamp1{box-shadow:0 0 22px #1a6bff,0 0 6px #1a6bff}
+#lcdWrap.lamp2{box-shadow:0 0 22px #19c25a,0 0 6px #19c25a}
+#lcdWrap.lamp3{box-shadow:0 0 26px #ff1a2e,0 0 8px #ff1a2e}
+#lcdWrap.lamp4{box-shadow:0 0 30px #ffc400,0 0 10px #ffc400}
+#lcdWrap.lamp5{animation:lampRb 1s linear infinite}
+@keyframes lampRb{0%{box-shadow:0 0 30px #ff3b3b}25%{box-shadow:0 0 30px #fffa6b}50%{box-shadow:0 0 30px #3bff8a}75%{box-shadow:0 0 30px #3bd4ff}100%{box-shadow:0 0 30px #ff3bd0}}
+.shake{animation:shake .45s}
+@keyframes shake{10%,50%,90%{transform:translate(-5px,2px)}30%,70%{transform:translate(5px,-2px)}}
+#lcd.bo{filter:brightness(0);transition:filter .15s}
+#step{position:absolute;inset:0;z-index:6;display:none;flex-direction:column;align-items:center;justify-content:center;background:#0008;gap:8px}
+#step.show{display:flex}
+#step .stt{font-weight:900;font-size:18px;letter-spacing:4px;text-shadow:0 0 8px #fff}
+#step .boxes{display:flex;gap:6px}
+#step i{width:44px;height:18px;border:2px solid #fff5;border-radius:4px;transition:all .15s}
+#step i.on{border-color:#fff;transform:scale(1.15)}
+#step i.l1.on{background:#1a6bff}#step i.l2.on{background:#19c25a}#step i.l3.on{background:#ff1a2e}#step i.l4.on{background:#ffc400}
+#step i.l5.on{background:linear-gradient(90deg,#ff3b3b,#fffa6b,#3bff8a,#3bd4ff,#ff3bd0)}
+#serif{position:absolute;left:4%;right:4%;bottom:5%;z-index:6;padding:6px 10px;border-radius:8px;background:#000d;border:2px solid #fff;font-weight:900;font-size:14px;display:none}
+#serif.show{display:block;animation:pop .3s}
+#serif small{display:block;font-size:10px;opacity:.8}
+#serif.l1{border-color:#1a6bff;color:#8fb8ff}#serif.l2{border-color:#19c25a;color:#7dffab}#serif.l3{border-color:#ff1a2e;color:#ff6b78}
+#serif.l4{border-color:#ffc400;color:#ffd84a}
+#serif.l5{border-color:#fff;color:#fff;background:linear-gradient(90deg,#ff3b3bcc,#ffb33bcc,#3bff8acc,#3bd4ffcc,#ff3bd0cc)}
+#gimmick{position:absolute;left:50%;top:-50%;transform:translateX(-50%);z-index:7;display:none;flex-direction:column;align-items:center;justify-content:center;width:46%;aspect-ratio:2/1;border-radius:14px;border:3px solid #fff;background:linear-gradient(#3a2a12,#000)}
+#gimmick b{font-size:clamp(22px,8vw,36px);letter-spacing:4px;color:#ffe27a;text-shadow:0 0 10px #ffb400}
+#gimmick small{font-size:10px;letter-spacing:4px;color:#fff}
+#gimmick.drop{display:flex;animation:gdrop 1.1s cubic-bezier(.3,1.5,.5,1) both}
+#gimmick.l4{box-shadow:0 0 30px #ffc400;border-color:#ffc400}
+#gimmick.l5{animation:gdrop 1.1s cubic-bezier(.3,1.5,.5,1) both,lampRb .6s linear infinite}
+@keyframes gdrop{0%{top:-50%}55%{top:24%}70%{top:16%}85%{top:24%}100%{top:24%}}
+.reel.flash{animation:rflash .14s steps(2) 6}
+.reel.flash2{animation:rflash2 .5s linear 2}
+@keyframes rflash{50%{filter:brightness(2) saturate(1.6)}}
+@keyframes rflash2{0%{filter:hue-rotate(0) brightness(1.6)}100%{filter:hue-rotate(360deg) brightness(1.6)}}
+.reel.dim{filter:brightness(.15)}
+.stop.on.c2{background:radial-gradient(circle at 50% 35%,#8affb0,#0a8a3a 60%,#003a14);border-color:#3bff8a}
+.stop.on.c3{background:radial-gradient(circle at 50% 35%,#ff8a8a,#e0001a 60%,#4a0008);border-color:#fff;box-shadow:0 0 14px #ff1a2e}
+.stop.on.c4{background:radial-gradient(circle at 50% 35%,#fff6c8,#ffc400 55%,#6a4a00);border-color:#fff;color:#3a2000;box-shadow:0 0 16px #ffc400}
+.stop.on.c5{background:linear-gradient(120deg,#ff3b3b,#ffb33b,#fffa6b,#3bff8a,#3bd4ff,#8a5bff);background-size:300%;animation:rb 1s linear infinite;border-color:#fff}
+#push.on.p3{background:radial-gradient(circle at 50% 30%,#ff8a8a,#e0001a 55%,#4a0008)}
+#push.on.p4{background:radial-gradient(circle at 50% 30%,#fff6c8,#ffc400 55%,#6a4a00);color:#3a2000}
+.rbar{width:70%;height:14px;border:2px solid #fff;border-radius:8px;margin-top:10px;overflow:hidden;background:#0008}
+.rbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffec3b,#ff3b3b);transition:width .1s}
+#lcdTitle.big{font-size:clamp(40px,14vw,64px)}
 .tag.at{background:#ff6a00;color:#000}.tag.up{background:linear-gradient(90deg,#ff3b3b,#ffb33b,#3bd4ff)}.tag.cz{background:#1a6bff}.tag.ng{background:#444}
 </style>
 </head>
@@ -174,7 +220,10 @@ canvas{width:100%;background:#0b0a10;border-radius:6px}
     <div id="lcdMain"><div id="lcdTitle"></div><div id="lcdSub"></div></div>
     <div id="gauge"><i></i></div>
     <div id="hp"><div class="hpa"><i></i></div><div class="hpe"><i></i></div></div>
+    <div id="serif"></div>
+    <div id="step"></div>
     <div id="cut"></div>
+    <div id="gimmick"></div>
     <div id="ov"></div>
   </div></div>
 
@@ -320,7 +369,7 @@ const SAVE='reijinSlot.v1',SSAVE='reijinSlot.settings';
 const ORDERS=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
 const TENJO={A:800,B:600,C:400,H:150};
 const AT_MODES=['AT','BATTLE','BONUS','TOKKA'];
-let S=Object.assign({sound:true,assist:true,wait:false,showSet:false},jload(SSAVE)||{});
+let S=Object.assign({sound:true,bgm:true,assist:true,wait:false,showSet:false},jload(SSAVE)||{});
 function jload(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
 function jsave(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function pickTenjoMode(s){return wpick({A:52-3*s,B:30,C:14,H:4+2*s});}
@@ -353,6 +402,36 @@ const sfx={
   nav(){this.t(1050,.06,'sine',.05);this.t(1050,.06,'sine',.05,.1);},
 };
 
+/* ================= BGM (モード別の簡易シーケンサー) ================= */
+const BGM={timer:null,song:null,step:0,
+  songs:{
+    NORMAL:{bpm:92,bass:[45,0,0,0,52,0,0,0,41,0,0,0,43,0,0,0],lead:[69,0,72,0,76,0,74,0,72,0,69,0,67,0,0,0]},
+    ZENCHO:{bpm:120,bass:[40,40,0,40,40,0,40,0,41,41,0,41,41,0,43,0],lead:[0,0,0,0,64,0,0,0,0,0,0,0,65,0,63,0]},
+    CZ:{bpm:140,bass:[45,0,45,0,48,0,48,0,50,0,50,0,52,0,52,0],lead:[69,71,72,74,76,74,72,71,72,74,76,77,79,77,76,74]},
+    AT:{bpm:150,bass:[45,57,45,57,41,53,41,53,43,55,43,55,40,52,40,52],lead:[76,0,76,79,0,76,74,0,72,0,72,74,0,72,69,0]},
+    BATTLE:{bpm:165,bass:[40,40,52,40,40,52,40,52,38,38,50,38,39,39,51,39],lead:[76,0,75,0,76,0,79,0,78,0,76,0,75,0,71,0]},
+    FANFARE:{bpm:150,bass:[48,60,48,60,53,65,53,65,55,67,55,67,48,60,48,60],lead:[72,76,79,84,0,79,0,76,77,81,84,0,83,0,79,0]},
+    HIKI:{bpm:80,bass:[45,0,0,0,0,0,0,0,40,0,0,0,0,0,0,0],lead:[0,0,64,0,0,0,62,0,0,0,60,0,0,0,59,0]},
+  },
+  pickSong(){
+    if(!S.sound||!S.bgm||document.hidden||!AC)return null;
+    const m=M.mode;
+    if(m==='BONUS'||m==='TOKKA'||(m==='AT'&&M.at&&M.at.upper))return'FANFARE';
+    return this.songs[m]?m:'NORMAL';
+  },
+  update(){
+    const sg=this.pickSong();if(sg===this.song)return;
+    clearInterval(this.timer);this.timer=null;this.song=sg;this.step=0;if(!sg)return;
+    const song=this.songs[sg],dur=60/song.bpm/4;
+    this.timer=setInterval(()=>{
+      const i=this.step++%16,b=song.bass[i],l=song.lead[i],f=n=>440*Math.pow(2,(n-69)/12);
+      if(b)sfx.t(f(b),dur*.9,'triangle',.035);
+      if(l)sfx.t(f(l),dur*.85,'square',.012);
+    },dur*1000);
+  }
+};
+document.addEventListener('visibilitychange',()=>BGM.update());
+
 /* ================= reel view ================= */
 const R=[];let H=60;
 function buildReels(){
@@ -375,6 +454,7 @@ function frame(t){
   const dt=Math.min(.05,(t-lastT)/1000||0);lastT=t;
   for(const rl of R){
     if(rl.state==='spin'){rl.pos-=SPEED*dt;if(rl.pos<0)rl.pos+=N;}
+    else if(rl.state==='rev'){rl.pos+=SPEED*.5*dt;if(rl.pos>=N)rl.pos-=N;}
     else if(rl.state==='stopping'){
       const remain=((rl.pos-rl.target)%N+N)%N,step=SPEED*dt;
       if(remain<=step){rl.pos=rl.target;rl.state='stop';onReelStopped();}
@@ -420,13 +500,14 @@ async function lever(){
   const done=new Promise(res=>G.resolve=res);
   $('#pay').textContent='';
   render();sfx.lever();
-  showNav(G);leverFx(G);
+  showNav(G);BGM.update();await leverFx(G);
   if(p.flag==='FREEZE')await freezeFx();
   R.forEach(r=>r.state='spin');
   await sleep(280);G.ready=true;updStops();
   if(auto)autoStops();
   await done;
   const key=classify(G.centers);
+  endFx(G,key);
   const pay=settle(p,key);
   const g=G;G=null;clearNav();updStops();
   await postGame(g,key,pay);
@@ -441,6 +522,7 @@ function pressStop(r){
   G.stopOrder.push(r);
   const idx=chooseStop(r,press,G.centers,curTarget(G));
   G.centers[r]=idx;rl.target=idx;rl.state='stopping';sfx.stop();
+  stopFx();
   const nd=$('#navbar').children[r];nd.classList.remove('on');
   updStops();
 }
@@ -464,27 +546,112 @@ const LINES={1:['霊力反応…?','ん…?','何か感じる…'],2:['霊力が
 function cutin(l,id,text){const el=$('#cut');el.className='';void el.offsetWidth;el.className='show lv'+l;
   el.innerHTML=`<div class="cc">${charHTML(id)}</div><div class="ct">${text}</div>`;sfx.cut(l);clearTimeout(cutT);cutT=setTimeout(()=>el.className='',1300);}
 function lcdFlash(l){const lcd=$('#lcd');lcd.classList.remove('fx1','fx2','fx3','fx4','fx5');lcd.classList.add('fx'+l);clearTimeout(fxT);fxT=setTimeout(()=>lcd.classList.remove('fx'+l),900);}
-function leverFx(p){
-  const f=p.flag;let l=0;
-  if(f==='FREEZE'||f==='BB')return;
-  if(isS(f))l=+wpick({0:10,2:20,3:40,4:25,5:5});
-  else if(isW(f))l=+wpick({0:30,1:40,2:25,3:5});
-  else if(rnd()<.04)l=+wpick({1:70,2:25,3:5});
-  if(M.mode==='ZENCHO'&&M.zc.result==='AT'&&rnd()<.15)l=Math.max(l,3);
-  if(M.mode==='BATTLE'&&l)l=Math.max(l,2);
-  if(!l)return;
-  lcdFlash(l);
-  const id=AT_MODES.includes(M.mode)?pick(['kaito','ren','toya','gou','shion','yuki']):pick(['kaito','yuki','ren']);
-  cutin(l,id,pick(LINES[l]));
+/* 期待度: 0=なし 1=青 2=緑 3=赤 4=金 5=虹(確定) */
+function calcHeat(g){
+  const f=g.flag;let h=0,sure=false;
+  if(f==='FREEZE')return{h:5,sure:true};
+  if(f==='BB'){h=4;sure=true;}else if(isS(f))h=3;else if(isW(f))h=2;
+  switch(M.mode){
+    case'NORMAL':if(M.kk==='super'&&h)h++;break;
+    case'ZENCHO':if(M.zc.result==='AT'){h+=h?2:1;sure=true;}else if(M.zc.result==='CZ'&&h)h+=1;break;
+    case'CZ':if(M.cz.won&&h){h+=1;sure=true;}break;
+    case'BATTLE':if(M.battle.win&&h){h+=1;sure=true;}break;
+    case'HIKI':if(M.hiki.win&&h){h+=1;sure=true;}break;
+  }
+  return{h:Math.min(4,h),sure};
+}
+function fxLevel(g){
+  const{h,sure}=calcHeat(g);
+  if(g.flag==='FREEZE'||g.flag==='BB')return 5;
+  if(h===0)return rnd()<.06?(rnd()<.8?1:2):0;
+  if(rnd()>.35+h*.15)return 0;
+  let l=Math.max(1,h-(rnd()<.4?1:0));
+  if(sure&&h>=3&&rnd()<.1)l=5;
+  return l;
+}
+const fxChar=()=>AT_MODES.includes(M.mode)?pick(['kaito','ren','toya','gou','shion','yuki']):pick(['kaito','yuki','ren']);
+const SERIF={1:['気を抜くなよ','…何だ?','様子を見るか'],2:['霊力が揺らいでる…','そろそろ来るぞ','準備はいいか?'],3:['ここで決める!!','行くぞ!!','全力で行く!!'],4:['この霊力…本物だ!!','もう止まらねぇ!!'],5:['―――覚醒―――']};
+function frameLamp(l){$('#lcdWrap').className=l?'lamp'+l:'';}
+function shake(){const a=$('#app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function serif(l,id){const el=$('#serif');el.className='';void el.offsetWidth;el.className='show l'+l;
+  el.innerHTML=`<small>${CHARS[id].short}</small>「${pick(SERIF[l])}」`;sfx.t(700+l*120,.15,'triangle',.05);clearTimeout(serif._t);serif._t=setTimeout(()=>el.className='',2200);}
+async function stepUp(l,id){
+  const el=$('#step');el.className='show';
+  el.innerHTML=`<div class="stt">STEP UP</div><div class="boxes">${[1,2,3,4,5].map(i=>`<i class="l${i}"></i>`).join('')}</div>`;
+  const bs=el.querySelectorAll('i');
+  for(let i=0;i<l;i++){bs[i].classList.add('on');sfx.t(500+i*180,.12,'square',.05);lcdFlash(i+1);if(i>=2)shake();await sleep(auto?110:260);}
+  await sleep(auto?120:320);el.className='';
+  if(l>=3)cutin(l,id,pick(LINES[l]));
+}
+async function blackout(l,id){
+  const lcd=$('#lcd');lcd.classList.add('bo');R.forEach(r=>r.el.classList.add('dim'));sfx.t(70,.7,'sawtooth',.06,0,40);
+  await sleep(auto?300:850);lcd.classList.remove('bo');R.forEach(r=>r.el.classList.remove('dim'));
+  lcdFlash(l);shake();cutin(l,id,l>=4?'激熱!!':'…来る!!');
+}
+async function gimmick(l){
+  const g=$('#gimmick');g.className='';void g.offsetWidth;g.className='drop l'+l;
+  g.innerHTML='<b>覚醒</b><small>REIJIN</small>';sfx.t(180,.5,'square',.07,0,1400);
+  await sleep(auto?350:650);shake();vib(150);sfx.t(90,.3,'sawtooth',.08);
+  await sleep(auto?200:450);setTimeout(()=>g.className='',700);
+}
+async function leverFx(g){
+  const l=fxLevel(g);g.fx=l;frameLamp(l);
+  if(!l||g.flag==='FREEZE')return;
+  if(l>=4)vib(l===5?[80,40,80,40,200]:120);
+  const id=fxChar();
+  switch(wpick(l>=3?{cut:30,step:25,serif:15,black:12,gim:18}:{cut:40,step:25,serif:35})){
+    case'cut':lcdFlash(l);cutin(l,id,pick(LINES[l]));break;
+    case'serif':lcdFlash(l);serif(l,id);break;
+    case'step':await stepUp(l,id);break;
+    case'black':await blackout(l,id);break;
+    case'gim':await gimmick(l);break;
+  }
+}
+/* 第1・第2停止時の演出 */
+function stopFx(){
+  const g=G,n=g.stopOrder.length;
+  if(n===1&&g.fx>=2&&rnd()<.4)g.btnFx=g.fx===5?5:Math.min(4,g.fx);
+  if(n===2){
+    const rem=[0,1,2].find(r=>!g.stopOrder.includes(r));
+    if(g.btnFx){document.querySelectorAll('.stop')[rem].classList.add('c'+g.btnFx);sfx.cut(g.btnFx);}
+    else if(g.fx>=3&&rnd()<.3)cutin(g.fx,fxChar(),'第3停止!!');
+  }
+}
+/* 全停止後: リールフラッシュ */
+function endFx(g,key){
+  document.querySelectorAll('.stop').forEach(b=>b.classList.remove('c2','c3','c4','c5'));
+  frameLamp(0);
+  const strong=isS(g.flag)||key.includes('BB')||key.includes('PREM');
+  if(strong||isW(g.flag)){
+    R.forEach(r=>{r.el.classList.remove('flash','flash2');void r.el.offsetWidth;r.el.classList.add(strong?'flash2':'flash');});
+    setTimeout(()=>R.forEach(r=>r.el.classList.remove('flash','flash2')),1100);
+    if(strong)sfx.t(1200,.3,'square',.04,0,2400);
+  }
 }
 async function freezeFx(){
-  sfx.freeze();$('#lcd').classList.add('freeze');document.body.classList.add('freezeBody');
-  await sleep(2600);$('#lcd').classList.remove('freeze');document.body.classList.remove('freezeBody');
-  $('#logo').classList.add('on');
+  if(rnd()<.5){
+    /* プレミア: リール逆回転 */
+    sfx.t(400,2,'sawtooth',.05,0,60);$('#lcd').classList.add('bo');
+    R.forEach(r=>r.state='rev');await sleep(2200);R.forEach(r=>r.state='stop');$('#lcd').classList.remove('bo');
+  }else{
+    sfx.freeze();$('#lcd').classList.add('freeze');document.body.classList.add('freezeBody');
+    await sleep(2600);$('#lcd').classList.remove('freeze');document.body.classList.remove('freezeBody');
+  }
+  vib([100,50,100,50,300]);shake();$('#logo').classList.add('on');frameLamp(5);
   await announce({title:'覚 醒',sub:'REIJIN FREEZE',cls:'rainbow',char:'kaito',ms:2000});
 }
+/* 上乗せ: 数字が段階的に増える演出 */
+async function uwanose(add,sub='上乗せ!!'){
+  const ov=$('#ov'),steps=[5,10,20,30,50,100].filter(v=>v<add);
+  if(add>=20&&rnd()<.6){
+    for(const v of steps.slice(-3)){ov.className='show gold';ov.innerHTML=`<div class="ovt">+${v}G</div><div class="ovs">まだまだ…!</div>`;sfx.t(900+v*4,.1,'square',.05);await sleep(auto?120:300);}
+  }
+  if(add>=50){shake();vib(200);}
+  sfx.win();await announce({title:`+${add}G`,sub,cls:add>=50?'rainbow':add>=30?'red':'gold',ms:1100});
+}
 let pushRes=null;
-function waitPush(){return new Promise(res=>{pushRes=res;$('#push').classList.add('on');if(auto)setTimeout(doPush,900);});}
+function waitPush(delay=900){return new Promise(res=>{pushRes=res;$('#push').classList.add('on');if(auto)setTimeout(doPush,delay);});}
 function doPush(){ac();if(pushRes){const r=pushRes;pushRes=null;$('#push').classList.remove('on');sfx.push();r();}
   else if(!G&&!busy&&M.mode==='NORMAL'){sfx.push();cutin(1,pick(['kaito','yuki']),pick(['俺が守る!','油断するなよ','集中しろ!']));}}
 let ovSkip=null;
@@ -499,10 +666,19 @@ function announce({title='',sub='',cls='',char=null,ms=1800}){
     ovSkip=null;setTimeout(()=>{if(!done)ovSkip=fin;},350);
   });
 }
-async function pushPhase(text='PUSH!!'){
-  const ov=$('#ov');ov.className='show pre';ov.innerHTML=`<div class="ovt">${text}</div><div class="ovs">PUSHボタンを押せ!</div>`;
-  await waitPush();ov.className='';
+/* PUSH告知。lvでボタン色(3=赤,4=金)、rendaで連打回数 */
+async function pushPhase(text='PUSH!!',{lv=0,renda=0}={}){
+  const ov=$('#ov'),pb=$('#push');pb.classList.remove('p3','p4');if(lv>=3)pb.classList.add('p'+Math.min(4,lv));
+  if(!renda){ov.className='show pre';ov.innerHTML=`<div class="ovt">${text}</div><div class="ovs">PUSHボタンを押せ!</div>`;await waitPush();}
+  else{
+    ov.className='show pre';ov.innerHTML=`<div class="ovt">${text}</div><div class="ovs">PUSH連打!!</div><div class="rbar"><i></i></div>`;
+    const bar=ov.querySelector('.rbar i');
+    for(let i=0;i<renda;i++){await waitPush(110);bar.style.width=((i+1)/renda*100)+'%';lcdFlash(1+Math.floor(i/renda*4));if(i%3===2)shake();}
+  }
+  pb.classList.remove('p3','p4');ov.className='';
 }
+/* 告知時のPUSHの色と連打の有無(結果が良いほど派手) */
+function pushStyle(good){const lv=good?+wpick({0:3,3:4,4:3}):+wpick({0:8,3:2});return{lv,renda:rnd()<(good?.45:.12)?8+rint(5):0};}
 function lcdMsg(t,s=''){$('#lcdTitle').textContent=t;$('#lcdSub').textContent=s;clearTimeout(lcdMsg._t);lcdMsg._t=setTimeout(()=>{lcdMsg._t=null;render();},1800);}
 
 /* ================= machine logic ================= */
@@ -562,10 +738,20 @@ async function pZencho(f,W,Sg){
   M.hamari++;const z=M.zc;z.g--;
   if(z.result==='CZ'&&((Sg&&rnd()<.25)||(W&&rnd()<.05)))z.result='AT';
   if(z.result==='NONE'&&((Sg&&rnd()<.5)||(W&&rnd()<.15)))z.result='CZ';
-  if(z.g===3){lcdFlash(z.result==='AT'?3:2);lcdMsg('魔獣 出現!!','VS 大魔獣');}
-  else if(z.g>0&&z.g<3)lcdMsg(pick(['カイトの攻撃!','魔獣の反撃!','激しい鍔迫り合い!']),'');
+  const good=z.result!=='NONE';
+  if(z.g===3){
+    /* 連続演出の開始: 次回予告。タイトルの色が期待度 */
+    z.enemy=z.result==='AT'?wpick({jaguard:2,nox:3,amane:3}):wpick({jaguard:5,nox:2,amane:1});
+    const col=z.result==='AT'?wpick({gold:3,red:5,blue:2}):z.result==='CZ'?wpick({red:3,blue:7}):wpick({red:1,blue:6,dark:3});
+    await announce({title:pick(['「決戦の刻」','「守るべきもの」','「黒き月」','「霊力の果て」','「反撃の狼煙」']),sub:'次回予告',cls:col,char:z.enemy,ms:1800});
+    lcdFlash(good?3:2);lcdMsg('魔獣 出現!!','VS 大魔獣');
+  }else if(z.g>0&&z.g<3){
+    shake();
+    if(good&&rnd()<.35){lcdFlash(4);lcdMsg('チャンスアップ!!',pick(['背景が赤く染まる…','霊力が共鳴している!']));}
+    else lcdMsg(pick(['カイトの攻撃!','魔獣の反撃!','激しい鍔迫り合い!']),'');
+  }
   if(z.g<=0){
-    await pushPhase();
+    await pushPhase('PUSH!!',pushStyle(good));
     if(z.result==='AT'){sfx.win();await announce({title:'撃破!!',sub:'AT確定',cls:'gold',char:'kaito',ms:1600});await startAT({why:z.why});}
     else if(z.result==='CZ'){sfx.win();await announce({title:'撃破!!',sub:'霊力解放ZONEへ',cls:'blue',char:'kaito',ms:1400});await startCZ();}
     else{sfx.lose();await announce({title:'撤退…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.zc=null;}
@@ -580,8 +766,9 @@ async function pCZ(f,W,Sg){
   const pr=({HAZURE:.02,REP:.04,BELL:.025,CHE_W:.35,SUI_W:.3,CHE_S:1,SUI_S:1,CHANCE:.7}[f]||0)+(M.setting-1)*.004;
   if(!c.won&&rnd()<pr)c.won=true;
   c.gauge=Math.min(c.won?100:86,c.gauge+(c.won?12+rint(12):3+rint(8)));
+  if(c.g>0&&c.g<=3&&!(c.won&&Sg)){lcdMsg(String(c.g),'ラストカウント');$('#lcdTitle').classList.add('big');setTimeout(()=>$('#lcdTitle').classList.remove('big'),1800);sfx.t(880,.2,'square',.05);if(c.won&&rnd()<.4)lcdFlash(3);}
   if((c.won&&Sg)||c.g<=0){
-    await pushPhase();const h=M.hist.find(x=>x.id===c.hid);
+    await pushPhase(c.won&&Sg?'霊力解放!!':'PUSH!!',pushStyle(c.won));const h=M.hist.find(x=>x.id===c.hid);
     if(c.won){M.cnt.CZwin++;if(h)h.res='成功';c.gauge=100;sfx.win();await announce({title:'霊力解放 成功!!',sub:'',cls:'gold',char:['kaito','yuki'],ms:1600});await startAT({why:'CZ'});}
     else{if(h)h.res='失敗';sfx.lose();await announce({title:'失敗…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.cz=null;}
   }
@@ -611,7 +798,7 @@ async function pAT(f,W,Sg,key){
     case'HAZURE':if(rnd()<1/500)bb=true;break;
     case'REP':if(rnd()<1/300)add=pick([10,20]);break;
   }
-  if(add){a.setG+=add;sfx.win();await announce({title:`+${add}G`,sub:'上乗せ!!',cls:add>=30?'rainbow':'gold',ms:1100});}
+  if(add){a.setG+=add;await uwanose(add);}
   if(st){a.stock+=st;sfx.win();await announce({title:'霊力ストック獲得!!',sub:`ストック ${a.stock}個`,cls:'red',ms:1200});}
   if(bb&&!a.pendingBB){a.pendingBB=true;sfx.big();await announce({title:'覚醒BONUS 確定!!',sub:'次ゲーム 赤7を狙え!',cls:'rainbow',char:pick(['kaito','shion','toya','ren']),ms:1600});}
   if(tok){await startTokka();return;}
@@ -626,7 +813,7 @@ async function startBonus(){
 async function pBonus(f,W,Sg){
   const b=M.bonus;b.g--;
   if((Sg&&rnd()<.3)||(W&&rnd()<.08)||(f==='BELL'&&rnd()<.005)){M.at.stock++;sfx.win();await announce({title:'霊力ストック獲得!!',sub:`ストック ${M.at.stock}個`,cls:'red',ms:1100});}
-  else if(W||Sg){const add=pick([10,20,30]);M.at.setG+=add;sfx.win();await announce({title:`+${add}G`,sub:'上乗せ!!',cls:'gold',ms:1000});}
+  else if(W||Sg){const add=pick([10,20,30]);M.at.setG+=add;await uwanose(add);}
   if(b.g<=0){
     const got=diff()-b.startDiff;$('#logo').classList.remove('on');
     await announce({title:'BONUS終了',sub:`純増 ${got}枚`,cls:'gold',ms:1500});
@@ -656,11 +843,13 @@ async function pBattle(f,W,Sg){
   const b=M.battle;b.g--;
   if(!b.win&&((Sg&&rnd()<.5)||(W&&rnd()<.15))){b.win=true;b.rev=true;}
   if(b.g>0){
-    if(rnd()<.5){b.hpE=Math.max(12,b.hpE-15-rint(20));lcdMsg(`${ATK[b.ally]}!!`,`${CHARS[b.ally].short}の攻撃`);}
-    else{b.hpA=Math.max(12,b.hpA-15-rint(20));lcdMsg(`${ENEMY_ATK[b.enemy]}!!`,`${CHARS[b.enemy].short}の攻撃`);}
+    shake();
+    if(rnd()<(b.win?.6:.4)){b.hpE=Math.max(12,b.hpE-15-rint(20));lcdMsg(`${ATK[b.ally]}!!`,`${CHARS[b.ally].short}の攻撃`);lcdFlash(b.win&&rnd()<.3?4:3);sfx.t(300,.25,'sawtooth',.06,0,1500);}
+    else{b.hpA=Math.max(12,b.hpA-15-rint(20));lcdMsg(`${ENEMY_ATK[b.enemy]}!!`,`${CHARS[b.enemy].short}の攻撃`);lcdFlash(1);sfx.t(1200,.3,'sawtooth',.06,0,200);}
+    if(b.g===1)serif(b.win&&rnd()<.3?4:3,b.ally);
     return;
   }
-  await pushPhase(b.win&&rnd()<.2?'決着!!':'PUSH!!');
+  await pushPhase(b.win&&rnd()<.2?'決着!!':'PUSH!!',pushStyle(b.win));
   const a=M.at;
   if(b.win){
     b.hpE=0;a.sets++;a.setG=15;
@@ -729,11 +918,12 @@ function render(){
   $('#lampYuuri').classList.toggle('on',AT_MODES.includes(M.mode)||M.mode==='HIKI');
   $('#bets').classList.toggle('on',!!G&&!M.replay);
   $('#bAuto').classList.toggle('act',auto);
+  BGM.update();
   const lcd=$('#lcd'),a=M.at;
   let bg='bg-normal-'+M.kk,ttl='夜霧町',info='',title='',sub='',L='kaito',Rc=null,gauge=null,hp=null;
   switch(M.mode){
     case'NORMAL':ttl='夜霧町';sub={low:'',high:'霊力が高まっている…',super:'夜霧町に異変…!!'}[M.kk];L=M.kk==='low'?'kaito':(M.kk==='high'?'yuki':'ren');break;
-    case'ZENCHO':bg='bg-zencho';ttl='冥界';L='kaito';Rc=M.zc.g<=3?'jaguard':null;sub=M.zc.g<=3?'VS 大魔獣':'冥府の都に潜入中…';break;
+    case'ZENCHO':bg='bg-zencho';ttl='冥界';L='kaito';Rc=M.zc.g<=3?(M.zc.enemy||'jaguard'):null;sub=M.zc.g<=3?'VS 大魔獣':'冥府の都に潜入中…';break;
     case'CZ':bg='bg-cz';ttl='霊力解放ZONE';info=`残り ${M.cz.g}G`;L='kaito';Rc='yuki';title='霊力解放';gauge=M.cz.gauge;break;
     case'AT':bg=a.upper?'bg-upper':'bg-at';ttl=a.upper?'真・覚醒RUSH':'REIJIN RUSH';info=`継続${a.keizoku}% ST${a.stock}`;
       title=a.pendingBB?'赤7を狙え!':`残り ${a.setG}G`;sub=`SET ${a.sets}  獲得 ${diff()-a.startDiff>=0?'+':''}${diff()-a.startDiff}枚`;L='kaito';Rc=a.upper?'shion':null;break;
@@ -792,7 +982,7 @@ function openMenu(){
   <div class="grid6">${[1,2,3,4,5,6].map(s=>`<button class="sbtn" data-set="${s}">設定${s}</button>`).join('')}<button class="sbtn" data-set="0" style="grid-column:span 2">ランダム(非公開)</button></div>
   ${sw('showSet','設定を表示する')}
   <h3>オプション</h3>
-  ${sw('sound','サウンド')}${sw('assist','目押しサポート（OFFで最大4コマ滑りの実機制御）')}${sw('wait','4.1秒ウェイト')}
+  ${sw('sound','サウンド')}${sw('bgm','BGM')}${sw('assist','目押しサポート（OFFで最大4コマ滑りの実機制御）')}${sw('wait','4.1秒ウェイト')}
   <h3>その他</h3>
   <div class="grid6"><button class="sbtn" id="bHelp" style="grid-column:span 2">遊び方・解析</button><button class="sbtn" id="bResetData" style="grid-column:span 2">データクリア</button></div>
   <p style="color:#8a84a0;font-size:11px">オリジナルのパチスロ風シミュレーターです。本物のお金は使いません。</p>`);
@@ -835,11 +1025,12 @@ function openHelp(){
   <table><tr><th>設定</th><th>弱チェリー</th><th>AT継続率の振り分け</th></tr>
   ${[1,2,3,4,5,6].map(s=>`<tr><td>${s}</td><td class="r">1/${86-2*s}</td><td>${s<=2?'低め':s<=4?'普通':'優遇'}</td></tr>`).join('')}</table>
   <h3>終了画面キャラ</h3><table>${ENDINGS.map(e=>`<tr><td>${e.id==='all'?'全員集合':CHARS[e.id].short}</td><td>${e.hint}</td></tr>`).join('')}</table>
+  <h3>演出の期待度</h3>青 ＜ 緑 ＜ 赤 ＜ 金 ＜ 虹（確定）。予告カットイン・セリフの文字色・ステップアップ・筐体の枠ランプ・第3停止ボタンの色・PUSHボタンの色が共通です。<br>消灯（ブラックアウト）と役物落下は赤以上。PUSH連打や次回予告のタイトル色もチャンス。リール逆回転はプレミアです。
   <h3>トロフィー</h3>銅=2以上 / 銀=3以上 / 金=4以上 / キリン柄=5以上 / 虹=6濃厚`);
 }
 $('#mbody').addEventListener('click',async e=>{
   const t=e.target;
-  if(t.dataset.sw){S[t.dataset.sw]=!S[t.dataset.sw];jsave(SSAVE,S);openMenu();}
+  if(t.dataset.sw){S[t.dataset.sw]=!S[t.dataset.sw];jsave(SSAVE,S);ac();BGM.update();openMenu();}
   else if(t.dataset.set!=null){if(busy)return toast('ゲーム中は変更できません');const s=+t.dataset.set||1+rint(6);if(+t.dataset.set===0){S.showSet=false;jsave(SSAVE,S);}
     M.setting=s;toNormal();M.hamari=0;save();render();toast(+t.dataset.set?`設定${s}に変更しました`:'ランダム設定にしました（非公開）');openMenu();}
   else if(t.id==='bHelp')openHelp();
