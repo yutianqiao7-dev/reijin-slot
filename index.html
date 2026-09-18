@@ -134,7 +134,8 @@ body.freezeBody .reel{filter:brightness(.2)}
 .mbox{width:100%;max-width:480px;max-height:86vh;background:#15131d;border-radius:14px 14px 0 0;display:flex;flex-direction:column;border-top:2px solid #ff9a3c}
 .mhead{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
 .mhead button{background:none;border:none;font-size:20px}
-#mbody{overflow:auto;padding:12px 14px 24px;font-size:13px;-webkit-user-select:text;user-select:text}
+#mbody{overflow:auto;padding:12px 14px 24px;font-size:13px}
+.prompt,.prompt *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 #mbody h3{font-size:14px;margin:14px 0 6px;color:#ffb36b}
 #mbody table{width:100%;border-collapse:collapse;font-size:12px}
 #mbody td,#mbody th{border-bottom:1px solid var(--line);padding:4px;text-align:left}
@@ -796,13 +797,19 @@ function openMenu(){
   <div class="grid6"><button class="sbtn" id="bHelp" style="grid-column:span 2">遊び方・解析</button><button class="sbtn" id="bResetData" style="grid-column:span 2">データクリア</button></div>
   <p style="color:#8a84a0;font-size:11px">オリジナルのパチスロ風シミュレーターです。本物のお金は使いません。</p>`);
 }
+async function copyText(t){
+  if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(t);return true;}catch(e){}}
+  const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);let ok=false;try{ok=document.execCommand('copy');}catch(e){}ta.remove();return ok;
+}
+const prompt=id=>`オリジナルキャラクター「${CHARS[id].name}」。パチスロ液晶演出用のキャラクター立ち絵。膝上〜全身、やや斜め向き、迫力のある決めポーズ。アニメ塗り、高精細。背景は透過（または真っ白な無地）。縦長 3:4。文字やロゴは入れない。`;
 function openChars(){
-  const prompt=id=>`オリジナルキャラクター「${CHARS[id].name}」。パチスロ液晶演出用のキャラクター立ち絵。膝上〜全身、やや斜め向き、迫力のある決めポーズ。アニメ塗り、高精細。背景は透過（または真っ白な無地）。縦長 3:4。文字やロゴは入れない。`;
   openModal('キャラ画像',`
   <p>Geminiで作った画像をキャラごとに登録してください。この端末のブラウザに保存されます。</p>
-  <div class="prompt">Geminiへの指示の例:\n<span class="hl">${prompt('kaito')}</span>\n（キャラ名を入れ替えて使ってください）</div>
+  <p>「コピー」を押すと、そのキャラのGemini用プロンプトがコピーされます。</p>
+  <div class="prompt">例:\n<span class="hl">${prompt('kaito')}</span></div>
   ${Object.keys(CHARS).map(id=>`<div class="charRow"><div class="th">${charHTML(id)}</div><div><b>${CHARS[id].name}</b></div>
-  <div><label class="sbtn" style="display:inline-flex;align-items:center;padding:0 10px">登録<input type="file" accept="image/*" data-up="${id}" hidden></label>
+  <div><button class="sbtn" data-copy="${id}">コピー</button> <label class="sbtn" style="display:inline-flex;align-items:center;padding:0 10px">登録<input type="file" accept="image/*" data-up="${id}" hidden></label>
   ${imgSrc[id]&&imgSrc[id].startsWith('data:')?`<button class="sbtn" data-del="${id}">削除</button>`:''}</div></div>`).join('')}`);
 }
 function openHelp(){
@@ -837,6 +844,9 @@ $('#mbody').addEventListener('click',async e=>{
     M.setting=s;toNormal();M.hamari=0;save();render();toast(+t.dataset.set?`設定${s}に変更しました`:'ランダム設定にしました（非公開）');openMenu();}
   else if(t.id==='bHelp')openHelp();
   else if(t.id==='bResetData'){if(busy)return;if(confirm('データカウンターとメダルをリセットしますか？')){const s=M.setting;M=newState(s);save();render();closeModal();}}
+  else if(t.dataset.copy){const id=t.dataset.copy;
+    if(await copyText(prompt(id))){t.textContent='✓済';toast(`${CHARS[id].name} のプロンプトをコピーしました`);}
+    else{const box=document.querySelector('#mbody .prompt .hl');box.textContent=prompt(id);box.scrollIntoView({block:'center'});toast('コピーできませんでした。例の文章を長押しして選択してください');}}
   else if(t.dataset.del){await DB.del(t.dataset.del);delete imgSrc[t.dataset.del];await loadImages();openChars();}
 });
 $('#mbody').addEventListener('change',async e=>{
