@@ -35,9 +35,22 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .bg-tokka #lcdBg{background:radial-gradient(circle at 50% 40%,#ffd1ea,#ff5aa8 45%,#3a0020)}
 .bg-hiki #lcdBg{background:linear-gradient(#1a1a1a,#3a3a4a)}
 @keyframes rb{0%{background-position:0% 50%}100%{background-position:100% 50%}}
-#lcdBg::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,#ffffff06 0 2px,transparent 2px 4px)}
-.bg-tokka #lcdBg::before{content:"";position:absolute;inset:0;background:radial-gradient(#ffffffaa 1px,transparent 2px) 0 0/22px 22px;animation:petal 3s linear infinite;opacity:.6}
-@keyframes petal{to{background-position:44px 66px}}
+#lcd::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:repeating-linear-gradient(0deg,#ffffff05 0 2px,transparent 2px 4px),radial-gradient(ellipse at center,transparent 55%,#000a 100%)}
+.bg-zencho #lcdMain{color:#16161e}.bg-zencho #lcdTitle,.bg-zencho #lcdSub{text-shadow:0 0 6px #fff,0 0 12px #fff}
+#scene,#fxc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#scene>div{position:absolute;inset:0;overflow:hidden;animation:scIn .8s ease}
+#scene svg{position:absolute;inset:0;width:100%;height:100%}
+@keyframes scIn{from{opacity:0;transform:scale(1.06)}}
+.rays{position:absolute;left:50%;top:58%;width:230%;aspect-ratio:1;transform:translate(-50%,-50%);background:repeating-conic-gradient(var(--ray) 0 5deg,transparent 5deg 15deg);animation:spin 26s linear infinite;opacity:.3;mix-blend-mode:screen}
+.rays.rb{background:repeating-conic-gradient(#ff3b3b 0 5deg,transparent 5deg 12deg,#fffa6b 12deg 17deg,transparent 17deg 24deg,#3bff8a 24deg 29deg,transparent 29deg 36deg,#3bd4ff 36deg 41deg,transparent 41deg 48deg,#c05bff 48deg 53deg,transparent 53deg 60deg);opacity:.4}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.sp{transform-box:fill-box;transform-origin:center;animation:spin2 14s linear infinite}
+.sp.r{animation-direction:reverse;animation-duration:9s}
+@keyframes spin2{to{transform:rotate(360deg)}}
+.flick{animation:flick .25s steps(2) infinite alternate}
+@keyframes flick{to{opacity:.75;transform:translateY(1px)}}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.08);opacity:.75}}
 .ch{position:absolute;bottom:0;height:92%;width:48%;display:flex;align-items:flex-end;justify-content:center;transition:transform .4s,opacity .4s}
 #chL{left:0}#chR{right:0}
 .ch img{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 8px #0008)}
@@ -150,7 +163,7 @@ body.freezeBody .reel{filter:brightness(.2)}
 .charRow .th .ph span{font-size:10px}
 .prompt{background:#0b0a10;border:1px solid var(--line);border-radius:6px;padding:8px;font-size:11px;white-space:pre-wrap;line-height:1.5}
 .hl{color:#ff9a3c}
-canvas{width:100%;background:#0b0a10;border-radius:6px}
+#mbody canvas{width:100%;background:#0b0a10;border-radius:6px}
 .hist{font-size:12px}
 .hist div{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--line)}
 .tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:10px;margin-right:4px;background:#333}
@@ -215,6 +228,7 @@ canvas{width:100%;background:#0b0a10;border-radius:6px}
 
   <div id="lcdWrap"><div id="lcd" class="bg-normal-low">
     <div id="lcdBg"></div>
+    <div id="scene"></div><canvas id="fxc"></canvas>
     <div id="chL" class="ch"></div><div id="chR" class="ch"></div>
     <div id="lcdTop"><span class="ttl" id="lcdTtl"></span><span id="lcdInfo"></span></div>
     <div id="lcdMain"><div id="lcdTitle"></div><div id="lcdSub"></div></div>
@@ -462,8 +476,137 @@ function frame(t){
     }
     rl.strip.style.transform=`translateY(${-rl.pos*H}px)`;
   }
+  FX.step(dt);
   requestAnimationFrame(frame);
 }
+
+/* ================= LCD背景: SVGの景色 + canvasパーティクル ================= */
+function lcg(seed){let v=seed;return()=>(v=(v*1664525+1013904223)%4294967296)/4294967296;}
+const svgWrap=(inner,defs='')=>`<svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMax slice"><defs>${defs}</defs>${inner}</svg>`;
+function skyline(seed,base,col,win,hMin,hMax,wMin,wMax,broken){
+  const r=lcg(seed);let x=-3,o='';
+  while(x<163){
+    const w=wMin+r()*(wMax-wMin),h=hMin+r()*(hMax-hMin),top=base-h;
+    if(broken)o+=`<polygon points="${x},${base+2} ${x},${top+r()*6} ${x+w*.4},${top} ${x+w*.6},${top+4+r()*8} ${x+w},${top+r()*5} ${x+w},${base+2}" fill="${col}"/>`;
+    else o+=`<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${w.toFixed(1)}" height="${(h+2).toFixed(1)}" fill="${col}"/>`;
+    if(win)for(let wy=top+3;wy<base-3;wy+=4)for(let wx=x+1.5;wx<x+w-2;wx+=3)if(r()<.3)o+=`<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="1.3" height="1.8" fill="${win}" opacity="${(.45+r()*.55).toFixed(2)}"/>`;
+    x+=w+r()*1.5;
+  }
+  return o;
+}
+function glowDef(id,col){return`<radialGradient id="${id}"><stop offset="0" stop-color="${col}" stop-opacity=".9"/><stop offset=".35" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`;}
+function sceneTown(k){
+  const C={low:{orb:'#fff6d0',far:'#1c2d5e',near:'#060a16',win:'#ffd76a'},high:{orb:'#ffb347',far:'#5a2440',near:'#1a0812',win:'#ffcf7a'},super:{orb:'#ff2d3d',far:'#4a0010',near:'#100003',win:'#ff6b6b'}}[k];
+  const orb=k==='high'
+    ?`<circle cx="38" cy="72" r="34" fill="url(#g1)"/><circle cx="38" cy="72" r="13" fill="${C.orb}"/>`
+    :`<circle cx="124" cy="22" r="30" fill="url(#g1)"/><circle cx="124" cy="22" r="10" fill="${C.orb}"/>`+(k==='low'?'<circle cx="121" cy="19" r="2" fill="#e8dfb8"/><circle cx="127" cy="25" r="1.4" fill="#e8dfb8"/><circle cx="126" cy="18" r="1" fill="#e8dfb8"/>':'');
+  const wires='<rect x="22" y="48" width="1" height="52" fill="#000"/><rect x="104" y="46" width="1" height="54" fill="#000"/><path d="M-5 52Q10 57 22.5 50Q63 60 104.5 48Q135 57 165 50M-5 55Q10 60 22.5 53Q63 63 104.5 51Q135 60 165 53" stroke="#000" stroke-width=".35" fill="none"/>';
+  return`<div>${svgWrap(orb+`<g opacity=".9">${skyline(7,92,C.far,null,18,44,7,15)}</g>`+skyline(3,100,C.near,C.win,8,32,10,22)+wires,glowDef('g1',C.orb))}</div>`;
+}
+function pagoda(x,base,lv,w){let o='';for(let i=0;i<lv;i++){const y=base-(i+1)*9,ww=w-i*3;o+=`<rect x="${x-ww/2+2}" y="${y+2}" width="${ww-4}" height="7" fill="#f3efe6"/><polygon points="${x-ww/2-3},${y+3} ${x+ww/2+3},${y+3} ${x+ww/2-2},${y-1} ${x-ww/2+2},${y-1}" fill="#34343e"/>`;}
+  return o+`<rect x="${x-.4}" y="${base-lv*9-7}" width=".8" height="7" fill="#34343e"/>`;}
+function sceneZencho(){
+  const far=`<g opacity=".35">${pagoda(28,78,4,18)}${pagoda(132,80,5,20)}</g>`;
+  const wall='<rect x="-5" y="74" width="170" height="30" fill="#f4f1ea"/><polygon points="-5,74 165,74 165,70 -5,70" fill="#3a3a44"/><rect x="-5" y="78" width="170" height="1" fill="#d8d2c4"/>';
+  return`<div>${svgWrap('<circle cx="80" cy="34" r="40" fill="url(#g1)"/>'+far+pagoda(80,74,6,30)+wall,glowDef('g1','#ffffff'))}</div>`;
+}
+function sceneCZ(){
+  const ring=(r,da,cls,w)=>`<circle class="sp ${cls}" cx="80" cy="56" r="${r}" fill="none" stroke="#9ff0ff" stroke-width="${w}" stroke-dasharray="${da}" opacity=".75"/>`;
+  return`<div><div class="rays" style="--ray:#39c6ff"></div>${svgWrap('<circle class="pulse" cx="80" cy="56" r="34" fill="url(#g1)"/>'+ring(16,'4 3','',1)+ring(28,'10 4 2 4','r',.8)+ring(42,'2 6','',1.2)+ring(58,'24 6','r',.6),glowDef('g1','#7fe8ff'))}</div>`;
+}
+function sceneAT(upper){
+  const mtn='<polygon points="-5,100 -5,70 20,52 38,66 60,44 84,64 104,48 128,66 146,54 165,68 165,100" fill="#1a0400" opacity=".85"/>';
+  const flame=`<path class="flick" d="M-5 100V86Q6 78 12 86Q20 74 28 86Q36 76 44 86Q54 72 62 86Q70 78 78 86Q88 74 96 86Q104 78 112 86Q122 72 130 86Q138 78 146 86Q156 76 165 86V100Z" fill="url(#fl)"/>`;
+  const defs=`<linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${upper?'#fff':'#ffdf6b'}"/><stop offset=".6" stop-color="${upper?'#ff6bd6':'#ff6a00'}"/><stop offset="1" stop-color="${upper?'#6b8aff':'#ff2d00'}" stop-opacity="0"/></linearGradient>`+glowDef('g1',upper?'#ffffff':'#ffb400');
+  return`<div><div class="rays ${upper?'rb':''}" style="--ray:#ffb400"></div>${svgWrap('<circle class="pulse" cx="80" cy="60" r="44" fill="url(#g1)"/>'+mtn+flame,defs)}</div>`;
+}
+function sceneBattle(){
+  const bolt='<polyline points="84,-2 74,30 86,34 70,64 84,68 72,104" fill="none" stroke="#fff" stroke-width="2.2"/><polyline points="84,-2 74,30 86,34 70,64 84,68 72,104" fill="none" stroke="#bfe3ff" stroke-width="6" opacity=".35"/>';
+  const halves='<polygon points="-5,-5 88,-5 70,105 -5,105" fill="url(#gL)"/><polygon points="88,-5 165,-5 165,105 70,105" fill="url(#gR)"/>';
+  const defs='<radialGradient id="gL" cx=".2" cy=".6"><stop offset="0" stop-color="#ff7a1a" stop-opacity=".7"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></radialGradient><radialGradient id="gR" cx=".8" cy=".6"><stop offset="0" stop-color="#3b6bff" stop-opacity=".7"/><stop offset="1" stop-color="#3b6bff" stop-opacity="0"/></radialGradient>';
+  const ground='<path d="M-5 92L40 88L70 94L100 87L165 93V105H-5Z" fill="#050208"/><path d="M60 94l8-5 6 4 9-6M96 88l-6 6 7 3" stroke="#ff6a00" stroke-width=".5" fill="none" opacity=".7"/>';
+  return`<div>${svgWrap(halves+ground+`<g class="flick">${bolt}</g>`,defs)}</div>`;
+}
+function sceneBonus(){
+  const emb='<g class="sp"><circle cx="80" cy="52" r="26" fill="none" stroke="#fff3a0" stroke-width="1.5" stroke-dasharray="3 2"/></g><circle cx="80" cy="52" r="20" fill="none" stroke="#ffcc33" stroke-width="3"/><g class="sp r"><polygon points="80,30 84,48 102,52 84,56 80,74 76,56 58,52 76,48" fill="#fff6c8" opacity=".85"/></g>';
+  return`<div><div class="rays" style="--ray:#fff3a0"></div>${svgWrap('<circle class="pulse" cx="80" cy="52" r="50" fill="url(#g1)"/>'+emb,glowDef('g1','#ffe27a'))}</div>`;
+}
+function sceneTokka(){
+  const r=lcg(11);let bl='';
+  const pts=[[4,30],[14,26],[24,30],[30,22],[40,26],[46,18],[18,40],[34,36],[52,30],[8,20],[28,14],[58,22]];
+  for(const[x,y]of pts)for(let i=0;i<4;i++)bl+=`<circle cx="${(x+(r()-.5)*8).toFixed(1)}" cy="${(y+(r()-.5)*6).toFixed(1)}" r="${(1.6+r()*2).toFixed(1)}" fill="${r()<.5?'#ffc1dc':'#ff8fc0'}" opacity=".95"/>`;
+  const branch='<path d="M-5 34Q10 28 22 30T46 20T62 20M22 30Q28 36 36 36M10 30Q12 24 8 18M40 25Q34 16 28 14" stroke="#2a0a18" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+  return`<div>${svgWrap('<circle cx="116" cy="34" r="42" fill="url(#g1)"/><circle cx="116" cy="34" r="22" fill="#ffe6f2"/>'+branch+bl+'<path d="M-5 100V90Q40 84 80 90T165 88V100Z" fill="#2a0014"/>',glowDef('g1','#ffb3d9'))}</div>`;
+}
+function sceneHiki(){
+  return`<div>${svgWrap(`<g opacity=".6">${skyline(21,94,'#2a2f3e',null,14,40,8,16,true)}</g>`+skyline(5,100,'#0d0f16','#6a7a9a',6,26,10,20,true)+'<rect x="-5" y="70" width="170" height="30" fill="url(#fog)"/>','<linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a96b0" stop-opacity="0"/><stop offset="1" stop-color="#8a96b0" stop-opacity=".35"/></linearGradient>')}</div>`;
+}
+const SCENES={'bg-normal-low':()=>sceneTown('low'),'bg-normal-high':()=>sceneTown('high'),'bg-normal-super':()=>sceneTown('super'),
+  'bg-zencho':sceneZencho,'bg-cz':sceneCZ,'bg-at':()=>sceneAT(false),'bg-upper':()=>sceneAT(true),'bg-battle':sceneBattle,'bg-bonus':sceneBonus,'bg-tokka':sceneTokka,'bg-hiki':sceneHiki};
+let curScene='';
+function setScene(bg){if(bg===curScene)return;curScene=bg;$('#scene').innerHTML=(SCENES[bg]||(()=>''))();FX.set(bg);}
+
+const FX={cv:null,c:null,w:1,h:1,ps:[],mode:'',t:0,flash:0,nextEv:3,shoot:null,bolt:null,
+  N:{'bg-normal-low':45,'bg-normal-high':28,'bg-normal-super':40,'bg-zencho':28,'bg-cz':60,'bg-at':55,'bg-upper':65,'bg-battle':26,'bg-bonus':50,'bg-tokka':36,'bg-hiki':80},
+  init(){this.cv=$('#fxc');this.c=this.cv.getContext('2d');this.resize();},
+  resize(){if(!this.cv)return;const r=$('#lcd').getBoundingClientRect();if(!r.width)return;const d=Math.min(2,window.devicePixelRatio||1);
+    this.w=r.width;this.h=r.height;this.cv.width=Math.round(r.width*d);this.cv.height=Math.round(r.height*d);this.c.setTransform(d,0,0,d,0,0);
+    const m=this.mode;this.mode='';this.set(m);},
+  set(m){if(m===this.mode)return;this.mode=m;this.ps=[];this.shoot=null;this.bolt=null;this.flash=0;for(let i=0;i<(this.N[m]||0);i++)this.ps.push(this.spawn(true));},
+  spawn(init){
+    const w=this.w,h=this.h,m=this.mode,p={x:rnd()*w,y:rnd()*h,s:1,ph:rnd()*6.28,rot:rnd()*6.28,vr:0,vx:0,vy:0,hue:rnd()*360};
+    switch(m){
+      case'bg-normal-low':p.y=rnd()*h*.55;p.s=.4+rnd()*1.1;break;
+      case'bg-normal-high':case'bg-normal-super':if(!init)p.y=h+5;p.vy=-(8+rnd()*(m==='bg-normal-super'?45:18));p.vx=(rnd()-.5)*6;p.s=.7+rnd()*1.5;break;
+      case'bg-zencho':if(!init)p.y=-5;p.vy=6+rnd()*10;p.vx=4+rnd()*6;p.s=1+rnd()*1.6;p.vr=(rnd()-.5)*3;break;
+      case'bg-cz':p.r=init?rnd()*w*.6:w*.5+rnd()*w*.15;p.ang=rnd()*6.28;p.s=.8+rnd()*1.4;break;
+      case'bg-at':case'bg-upper':if(!init)p.y=h+5;p.vy=-(40+rnd()*90);p.vx=(rnd()-.5)*20;p.s=.8+rnd()*1.6;break;
+      case'bg-battle':{const d=rnd()<.5?1:-1;if(!init)p.x=d>0?-60:w+60;p.vx=d*(260+rnd()*320);p.len=20+rnd()*50;break;}
+      case'bg-bonus':if(!init)p.y=h+5;p.vy=-(10+rnd()*25);p.s=1+rnd()*2.2;break;
+      case'bg-tokka':if(!init)p.y=-8;p.vy=12+rnd()*18;p.vx=8+rnd()*14;p.s=2+rnd()*2.4;p.vr=(rnd()-.5)*4;break;
+      case'bg-hiki':if(!init)p.y=-10;p.vy=240+rnd()*120;p.vx=-45;p.len=6+rnd()*8;break;
+    }
+    return p;
+  },
+  step(dt){
+    if(!this.c||!this.mode)return;
+    const c=this.c,w=this.w,h=this.h,m=this.mode,t=(this.t+=dt);
+    c.clearRect(0,0,w,h);
+    c.globalCompositeOperation=(m==='bg-zencho'||m==='bg-hiki'||m==='bg-tokka')?'source-over':'lighter';
+    for(let i=0;i<this.ps.length;i++){
+      const p=this.ps[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vr*dt;let out=false;
+      switch(m){
+        case'bg-normal-low':{const a=.35+.65*Math.abs(Math.sin(t*1.6+p.ph));c.fillStyle=`rgba(255,255,230,${a})`;c.beginPath();c.arc(p.x,p.y,p.s,0,6.28);c.fill();break;}
+        case'bg-normal-high':case'bg-normal-super':{p.x+=Math.sin(t*2+p.ph)*.3;const col=m==='bg-normal-super'?'255,60,50':'255,170,70';
+          c.fillStyle=`rgba(${col},.18)`;c.beginPath();c.arc(p.x,p.y,p.s*3.2,0,6.28);c.fill();c.fillStyle=`rgba(${col},.9)`;c.beginPath();c.arc(p.x,p.y,p.s,0,6.28);c.fill();out=p.y<-8;break;}
+        case'bg-zencho':c.save();c.translate(p.x,p.y);c.rotate(p.rot);c.fillStyle='rgba(120,112,100,.45)';c.fillRect(-p.s,-p.s/2,p.s*2,p.s);c.restore();out=p.y>h+6||p.x>w+6;break;
+        case'bg-cz':{p.ang+=dt*(1.2+40/(p.r+12));p.r-=dt*(14+w*.06);const x=w/2+Math.cos(p.ang)*p.r,y=h*.56+Math.sin(p.ang)*p.r*.55,a=Math.min(1,p.r/(w*.3));
+          c.fillStyle=`rgba(140,240,255,${.25+.75*(1-a)})`;c.beginPath();c.arc(x,y,p.s,0,6.28);c.fill();out=p.r<3;break;}
+        case'bg-at':case'bg-upper':{const col=m==='bg-upper'?`hsla(${(p.hue+t*140)%360},100%,65%,.95)`:`hsla(${28+p.ph*4},100%,${55+p.s*8}%,.95)`;
+          c.strokeStyle=col;c.lineWidth=p.s;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-p.vx*.05,p.y-p.vy*.05);c.stroke();out=p.y<-12;break;}
+        case'bg-battle':c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=1;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-Math.sign(p.vx)*p.len,p.y);c.stroke();out=p.x<-80||p.x>w+80;break;
+        case'bg-bonus':{const a=.3+.7*Math.abs(Math.sin(t*3+p.ph)),r=p.s*2.2;c.save();c.translate(p.x,p.y);c.rotate(t+p.ph);c.fillStyle=`rgba(255,230,120,${a})`;
+          c.fillRect(-r,-.5,r*2,1);c.fillRect(-.5,-r,1,r*2);c.beginPath();c.arc(0,0,p.s*.7,0,6.28);c.fill();c.restore();out=p.y<-8;break;}
+        case'bg-tokka':p.x+=Math.sin(t*1.8+p.ph)*.5;c.save();c.translate(p.x,p.y);c.rotate(p.rot);c.fillStyle='rgba(255,183,213,.92)';c.beginPath();c.ellipse(0,0,p.s*1.5,p.s*.8,0,0,6.28);c.fill();
+          c.fillStyle='rgba(255,120,170,.6)';c.beginPath();c.ellipse(p.s*.6,0,p.s*.5,p.s*.3,0,0,6.28);c.fill();c.restore();out=p.y>h+10||p.x>w+10;break;
+        case'bg-hiki':c.strokeStyle='rgba(170,190,225,.35)';c.lineWidth=1;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x+p.vx*.03,p.y+p.len);c.stroke();out=p.y>h+10;break;
+      }
+      if(out)this.ps[i]=this.spawn(false);
+    }
+    /* 単発イベント: 流れ星・落雷 */
+    if((this.nextEv-=dt)<=0){
+      this.nextEv=3+rnd()*5;
+      if(m==='bg-normal-low')this.shoot={x:w*(.5+rnd()*.5),y:rnd()*h*.25,life:0};
+      if(m==='bg-normal-super'||m==='bg-battle'){this.flash=1;const pts=[[w*(.2+rnd()*.6),0]];while(pts[pts.length-1][1]<h*.8)pts.push([pts[pts.length-1][0]+(rnd()-.5)*30,pts[pts.length-1][1]+10+rnd()*18]);this.bolt=pts;}
+    }
+    if(this.shoot){const s=this.shoot;s.life+=dt;const x=s.x-s.life*180,y=s.y+s.life*70,g=c.createLinearGradient(x,y,x+40,y-16);
+      g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(1,'rgba(255,255,255,0)');c.strokeStyle=g;c.lineWidth=1.4;c.beginPath();c.moveTo(x,y);c.lineTo(x+40,y-16);c.stroke();if(s.life>.8)this.shoot=null;}
+    if(this.flash>0){
+      if(this.bolt&&this.flash>.6){c.strokeStyle=`rgba(255,240,255,${this.flash})`;c.lineWidth=1.8;c.beginPath();this.bolt.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();}
+      c.globalCompositeOperation='source-over';c.fillStyle=`rgba(255,255,255,${this.flash*.35})`;c.fillRect(0,0,w,h);this.flash=Math.max(0,this.flash-dt*2.5);
+    }
+  }
+};
 
 /* ================= game flow ================= */
 let G=null,busy=false,auto=false,lastLever=0;
@@ -933,6 +1076,7 @@ function render(){
     case'HIKI':bg='bg-hiki';ttl='反撃ZONE';info=`残り ${M.hiki.g}G`;title='反撃ZONE';sub='引き戻しを狙え!';L='yuki';break;
   }
   ['bg-normal-low','bg-normal-high','bg-normal-super','bg-zencho','bg-cz','bg-at','bg-upper','bg-battle','bg-bonus','bg-tokka','bg-hiki'].forEach(c=>lcd.classList.toggle(c,c===bg));
+  setScene(bg);
   $('#lcdTtl').textContent=ttl;$('#lcdInfo').textContent=info;
   if(!lcdMsg._t){$('#lcdTitle').textContent=title;$('#lcdSub').textContent=sub;}
   setChar('#chL',L);setChar('#chR',Rc);
@@ -1066,9 +1210,9 @@ document.addEventListener('keydown',e=>{
   else if(k==='j'||k==='1')pressStop(0);else if(k==='k'||k==='2')pressStop(1);else if(k==='l'||k==='3')pressStop(2);
   else if(k==='p')doPush();
 });
-window.addEventListener('resize',measure);
+window.addEventListener('resize',()=>{measure();FX.resize();});
 
-buildReels();render();requestAnimationFrame(frame);loadImages();
+buildReels();FX.init();render();requestAnimationFrame(frame);loadImages();
 </script>
 </body>
 </html>
