@@ -139,7 +139,7 @@ body.freezeBody .reel{filter:brightness(.2)}
 .sbtn{height:40px;border-radius:8px;border:1px solid #3b3452;background:#1d1a28;font-size:12px;font-weight:700}
 .sbtn.act{background:#ff6a00;border-color:#ffb36b;color:#000}
 #push{height:52px;border-radius:26px;border:2px solid #555;background:radial-gradient(circle at 50% 30%,#666,#222);font-weight:900;letter-spacing:1px}
-#push.on{border-color:#fff;background:radial-gradient(circle at 50% 30%,#fffa6b,#ff3b3b 50%,#8a00ff);animation:blink .35s steps(2) infinite;box-shadow:0 0 18px #fffa6b}
+#push.on{border-color:#fff;background:radial-gradient(circle at 50% 30%,#ffffff,#9aa4b8 55%,#3a4050);animation:blink .35s steps(2) infinite;box-shadow:0 0 16px #ffffffaa}
 #toast{position:fixed;left:50%;bottom:20%;transform:translateX(-50%);background:#000d;border:1px solid #ff9a3c;padding:8px 14px;border-radius:8px;font-size:13px;display:none;z-index:50;max-width:90%}
 /* modal */
 #modal{position:fixed;inset:0;background:#000b;z-index:40;display:flex;align-items:flex-end;justify-content:center}
@@ -202,13 +202,16 @@ body.freezeBody .reel{filter:brightness(.2)}
 .reel.flash{animation:rflash .14s steps(2) 6}
 .reel.flash2{animation:rflash2 .5s linear 2}
 @keyframes rflash{50%{filter:brightness(2) saturate(1.6)}}
-@keyframes rflash2{0%{filter:hue-rotate(0) brightness(1.6)}100%{filter:hue-rotate(360deg) brightness(1.6)}}
+@keyframes rflash2{50%{filter:brightness(2.2) sepia(.6) saturate(2.5)}}
+.reel.flash3{animation:rflash3 .5s linear 2}
+@keyframes rflash3{0%{filter:hue-rotate(0) brightness(1.6)}100%{filter:hue-rotate(360deg) brightness(1.6)}}
 .reel.dim{filter:brightness(.15)}
 .stop.on.c2{background:radial-gradient(circle at 50% 35%,#8affb0,#0a8a3a 60%,#003a14);border-color:#3bff8a}
 .stop.on.c3{background:radial-gradient(circle at 50% 35%,#ff8a8a,#e0001a 60%,#4a0008);border-color:#fff;box-shadow:0 0 14px #ff1a2e}
 .stop.on.c4{background:radial-gradient(circle at 50% 35%,#fff6c8,#ffc400 55%,#6a4a00);border-color:#fff;color:#3a2000;box-shadow:0 0 16px #ffc400}
 .stop.on.c5{background:linear-gradient(120deg,#ff3b3b,#ffb33b,#fffa6b,#3bff8a,#3bd4ff,#8a5bff);background-size:300%;animation:rb 1s linear infinite;border-color:#fff}
 #push.on.p3{background:radial-gradient(circle at 50% 30%,#ff8a8a,#e0001a 55%,#4a0008)}
+#push.on.p5{background:linear-gradient(120deg,#ff3b3b,#ffb33b,#fffa6b,#3bff8a,#3bd4ff,#8a5bff);background-size:300%;animation:rb 1s linear infinite,blink .35s steps(2) infinite;color:#fff}
 #push.on.p4{background:radial-gradient(circle at 50% 30%,#fff6c8,#ffc400 55%,#6a4a00);color:#3a2000}
 .rbar{width:70%;height:14px;border:2px solid #fff;border-radius:8px;margin-top:10px;overflow:hidden;background:#0008}
 .rbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffec3b,#ff3b3b);transition:width .1s}
@@ -297,9 +300,9 @@ function charHTML(id){const c=CHARS[id];if(!c)return'';if(imgSrc[id])return`<img
 
 /* image store (IndexedDB) */
 const DB={db:null,
-  open(){return new Promise(res=>{try{const r=indexedDB.open('reijinSlot',1);r.onupgradeneeded=()=>r.result.createObjectStore('img');r.onsuccess=()=>{this.db=r.result;res();};r.onerror=()=>res();}catch(e){res();}});},
-  tx(mode,fn){return new Promise(res=>{try{if(!this.db)return res(null);const t=this.db.transaction('img',mode);const st=t.objectStore('img');const q=fn(st);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null);}catch(e){res(null);}});},
-  get(k){return this.tx('readonly',s=>s.get(k));},put(k,v){return this.tx('readwrite',s=>s.put(v,k));},del(k){return this.tx('readwrite',s=>s.delete(k));}
+  open(){return new Promise(res=>{try{const r=indexedDB.open('reijinSlot',2);r.onupgradeneeded=()=>{const d=r.result;for(const n of['img','snd'])if(!d.objectStoreNames.contains(n))d.createObjectStore(n);};r.onsuccess=()=>{this.db=r.result;res();};r.onerror=()=>res();}catch(e){res();}});},
+  tx(store,mode,fn){return new Promise(res=>{try{if(!this.db)return res(null);const t=this.db.transaction(store,mode);const st=t.objectStore(store);const q=fn(st);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null);}catch(e){res(null);}});},
+  get(k,st='img'){return this.tx(st,'readonly',s=>s.get(k));},put(k,v,st='img'){return this.tx(st,'readwrite',s=>s.put(v,k));},del(k,st='img'){return this.tx(st,'readwrite',s=>s.delete(k));}
 };
 function probe(url){return new Promise(res=>{const i=new Image();i.onload=()=>res(true);i.onerror=()=>res(false);i.src=url;});}
 async function loadImages(){
@@ -383,7 +386,7 @@ const SAVE='reijinSlot.v1',SSAVE='reijinSlot.settings';
 const ORDERS=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
 const TENJO={A:800,B:600,C:400,H:150};
 const AT_MODES=['AT','BATTLE','BONUS','TOKKA'];
-let S=Object.assign({sound:true,bgm:true,assist:true,wait:false,showSet:false},jload(SSAVE)||{});
+let S=Object.assign({sound:true,bgm:true,seVol:.8,bgmVol:.5,assist:true,wait:false,showSet:false},jload(SSAVE)||{});
 function jload(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
 function jsave(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function pickTenjoMode(s){return wpick({A:52-3*s,B:30,C:14,H:4+2*s});}
@@ -397,27 +400,112 @@ const diff=()=>M.outT-M.inT;
 function save(){jsave(SAVE,M);}
 
 /* ================= sound ================= */
-let AC=null;
-function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+/* 音の枠。ファイル(他のAIで作った音)を登録すると内蔵シンセの代わりに鳴る */
+const SOUNDS=[
+  {key:'bgm_normal',type:'bgm',label:'BGM 通常時',prompt:'Japanese anime soundtrack, calm mysterious night city, piano and strings with light hip-hop drums, instrumental, seamless loop, 90 BPM'},
+  {key:'bgm_zencho',type:'bgm',label:'BGM 前兆',prompt:'tense suspense anime soundtrack, taiko drums and low strings slowly building, ominous, instrumental, seamless loop, 120 BPM'},
+  {key:'bgm_cz',type:'bgm',label:'BGM チャンスゾーン',prompt:'rising energy anime soundtrack, fast strings and synth arpeggios, hopeful tension, instrumental, seamless loop, 140 BPM'},
+  {key:'bgm_at',type:'bgm',label:'BGM AT',prompt:'high-energy J-rock anime opening instrumental, distorted guitars, driving drums, heroic and uplifting, seamless loop, 150 BPM'},
+  {key:'bgm_battle',type:'bgm',label:'BGM 決戦バトル',prompt:'epic anime final battle music, orchestral rock with choir, fast double-kick drums, intense, instrumental, seamless loop, 165 BPM'},
+  {key:'bgm_bonus',type:'bgm',label:'BGM ボーナス・上位AT・特化',prompt:'triumphant celebratory J-rock fanfare, brass section and guitars, euphoric jackpot feeling, instrumental, seamless loop, 150 BPM'},
+  {key:'bgm_hiki',type:'bgm',label:'BGM 引き戻しゾーン',prompt:'melancholic anime soundtrack in the rain, solo piano and soft strings, sad but hopeful, instrumental, seamless loop, 80 BPM'},
+  {key:'lever',type:'se',label:'レバー',prompt:'heavy mechanical slot machine lever pull, metallic clunk with short spring rattle, close mic, 0.5 seconds'},
+  {key:'stop',type:'se',label:'ストップ',prompt:'short crisp plastic button click with a small mechanical reel stop thud, 0.2 seconds'},
+  {key:'pay',type:'se',label:'払い出し',prompt:'pachislot medal payout, rapid bright electronic coin chimes, 1 second'},
+  {key:'replay',type:'se',label:'リプレイ',prompt:'short bright two-note electronic chime, arcade replay sound, 0.4 seconds'},
+  {key:'nav',type:'se',label:'押し順ナビ',prompt:'quick double electronic beep, navigation alert, clean, 0.4 seconds'},
+  {key:'cut_low',type:'se',label:'カットイン（青・緑）',prompt:'anime style swoosh cut-in transition with light shimmer, 0.8 seconds'},
+  {key:'cut_high',type:'se',label:'カットイン（赤・金）',prompt:'intense anime cut-in, heavy sword slash whoosh with deep boom impact, 1 second'},
+  {key:'cut_rainbow',type:'se',label:'カットイン（虹・確定）',prompt:'epic celestial choir hit with glittering chimes and huge impact, premium jackpot reveal, 2 seconds'},
+  {key:'step',type:'se',label:'ステップアップ',prompt:'single rising electronic step-up beep with a small whoosh, 0.25 seconds'},
+  {key:'serif',type:'se',label:'セリフ予告',prompt:'short dramatic anime dialogue pop sound, 0.3 seconds'},
+  {key:'blackout',type:'se',label:'消灯',prompt:'power down sound, electricity cut, deep low thud, 1 second'},
+  {key:'gimmick',type:'se',label:'役物落下',prompt:'heavy metal object falling fast with a whistle, mechanical gimmick drop, 0.7 seconds'},
+  {key:'impact',type:'se',label:'衝撃（役物・揺れ）',prompt:'massive cinematic boom impact with sub bass, 1 second'},
+  {key:'rflash',type:'se',label:'リールフラッシュ',prompt:'sparkling magical shimmer with bright chime, 0.8 seconds'},
+  {key:'push',type:'se',label:'PUSH告知',prompt:'powerful electronic riser into a bright impact hit, button press reveal, 1 second'},
+  {key:'win',type:'se',label:'告知成功・上乗せ',prompt:'triumphant short orchestral brass stinger with cymbal crash, victory, 1.5 seconds'},
+  {key:'big',type:'se',label:'AT突入・ボーナス',prompt:'huge jackpot fanfare, orchestral brass and electric guitar, bells and crowd cheer, 3 seconds'},
+  {key:'lose',type:'se',label:'ハズレ・敗北',prompt:'descending sad synth tone, disappointment, 1 second'},
+  {key:'freeze',type:'se',label:'フリーズ',prompt:'all sound suddenly cuts, deep ominous rumble building with reverse cymbal, 3 seconds'},
+  {key:'count',type:'se',label:'カウントダウン',prompt:'tense countdown tick with deep boom, 0.5 seconds'},
+  {key:'tick',type:'se',label:'上乗せカウント',prompt:'bright coin-like ding for counting up numbers, 0.2 seconds'},
+  {key:'hit',type:'se',label:'バトル攻撃',prompt:'anime sword slash with energy blast impact, 0.8 seconds'},
+  {key:'damage',type:'se',label:'バトル被弾',prompt:'dark energy blast hitting hard, heavy impact, 0.8 seconds'},
+];
+let AC=null,BUS=null,audioOn=false;
+function ac(){
+  if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();buildBus();}catch(e){AC=null;}}
+  if(AC&&audioOn&&AC.state==='suspended')AC.resume();return AC;
+}
+function unlockAudio(){if(audioOn)return;audioOn=true;ac();BGM.update();}
+function buildBus(){
+  const a=AC,comp=a.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.connect(a.destination);
+  const master=a.createGain(),se=a.createGain(),bgm=a.createGain(),synth=a.createGain();
+  master.connect(comp);se.connect(master);bgm.connect(master);synth.connect(se);
+  /* 内蔵シンセ用の簡易リバーブ */
+  const len=Math.floor(a.sampleRate*1.4),ir=a.createBuffer(2,len,a.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);}
+  const rev=a.createConvolver(),send=a.createGain();rev.buffer=ir;send.gain.value=.25;synth.connect(send);send.connect(rev);rev.connect(se);
+  const nb=a.createBuffer(1,a.sampleRate,a.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+  BUS={master,se,bgm,synth,rev:send,noise:nb};applyVol();
+}
+function applyVol(){if(!BUS)return;BUS.se.gain.value=S.sound?S.seVol:0;BUS.bgm.gain.value=(S.sound&&S.bgm)?S.bgmVol:0;}
+function decodeAudio(ab){return new Promise((res,rej)=>{try{const p=AC.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej);}catch(e){rej(e);}});}
+const SND={buf:{},src:{},
+  async load(){
+    if(!ac())return;
+    for(const s of SOUNDS){
+      const d=await DB.get(s.key,'snd');
+      if(d){try{this.buf[s.key]=await decodeAudio(d.slice(0));this.src[s.key]='user';continue;}catch(e){}}
+      try{const r=await fetch(`assets/sounds/${s.key}.mp3`);if(r.ok){this.buf[s.key]=await decodeAudio(await r.arrayBuffer());this.src[s.key]='file';}}catch(e){}
+    }
+    BGM.song=undefined;BGM.update();
+  }
+};
+function playBuf(key,{rate=1,vol=1}={}){
+  const b=SND.buf[key];if(!b||!S.sound||!BUS)return false;
+  try{const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;s.playbackRate.value=rate;g.gain.value=vol;s.connect(g).connect(BUS.se);s.start();}catch(e){}
+  return true;
+}
 const sfx={
-  t(f,d,type='square',v=.05,delay=0,slide){if(!S.sound)return;const a=ac();if(!a)return;try{const o=a.createOscillator(),g=a.createGain(),t0=a.currentTime+delay;
+  t(f,d,type='square',v=.05,delay=0,slide,out){if(!S.sound)return;const a=ac();if(!a||!BUS)return;try{const o=a.createOscillator(),g=a.createGain(),t0=a.currentTime+delay;
     o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
-    g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g).connect(a.destination);o.start(t0);o.stop(t0+d+.03);}catch(e){}},
-  lever(){this.t(160,.08,'square',.07);this.t(80,.15,'sawtooth',.05,.03);},
-  stop(){this.t(1400,.035,'square',.045);},
-  pay(n){for(let i=0;i<Math.min(n,15);i++)this.t(1900,.03,'square',.025,i*.045);},
-  replay(){this.t(900,.06,'triangle',.06);this.t(1350,.09,'triangle',.06,.07);},
-  cut(l){const b=[0,500,600,700,850,1000][l]||500;this.t(b,.3,'sawtooth',.05,0,b*2.2);},
-  big(){[523,659,784,1047,1319,1568].forEach((f,i)=>this.t(f,.28,'square',.05,i*.09));},
-  win(){[784,988,1175,1568].forEach((f,i)=>this.t(f,.2,'square',.05,i*.07));},
-  lose(){this.t(320,.5,'triangle',.06,0,110);},
-  push(){this.t(1500,.14,'square',.06,0,3200);},
-  freeze(){this.t(55,2.6,'sawtooth',.1,0,28);},
-  nav(){this.t(1050,.06,'sine',.05);this.t(1050,.06,'sine',.05,.1);},
+    g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+.005);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+    o.connect(g).connect(out||BUS.synth);o.start(t0);o.stop(t0+d+.05);}catch(e){}},
+  n(d,v=.1,f=1200,q=1,delay=0,slide){if(!S.sound)return;const a=ac();if(!a||!BUS)return;try{const s=a.createBufferSource(),fl=a.createBiquadFilter(),g=a.createGain(),t0=a.currentTime+delay;
+    s.buffer=BUS.noise;fl.type='bandpass';fl.frequency.setValueAtTime(f,t0);if(slide)fl.frequency.exponentialRampToValueAtTime(slide,t0+d);fl.Q.value=q;
+    g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);s.connect(fl).connect(g).connect(BUS.synth);s.start(t0);s.stop(t0+d+.05);}catch(e){}},
+  chord(ns,d,type,v,delay=0){ns.forEach(n=>this.t(440*Math.pow(2,(n-69)/12),d,type,v,delay));},
+  lever(){if(playBuf('lever'))return;this.n(.12,.3,500,1.2);this.t(130,.14,'triangle',.14,0,60);this.n(.05,.15,3200,2,.09);},
+  stop(){if(playBuf('stop'))return;this.n(.035,.25,2600,3);this.t(240,.07,'triangle',.1,0,110);},
+  pay(n){if(playBuf('pay'))return;for(let i=0;i<Math.min(n,15);i++){this.t(2200,.06,'sine',.05,i*.05);this.t(3300,.05,'sine',.025,i*.05);}},
+  replay(){if(playBuf('replay'))return;this.t(1047,.14,'sine',.07);this.t(1568,.22,'sine',.07,.08);},
+  nav(){if(playBuf('nav'))return;this.t(1319,.07,'sine',.06);this.t(1319,.07,'sine',.06,.11);},
+  cut(l){const k=l>=5?'cut_rainbow':l>=3?'cut_high':'cut_low';if(playBuf(k))return;
+    this.n(.4,.14,700,.7,0,7000);const b=[0,500,600,700,850,1000][l]||500;this.t(b,.3,'sawtooth',.03,0,b*2.2);
+    if(l>=3)this.t(70,.6,'sine',.35,.04,38);if(l>=5)this.chord([72,76,79,84],1.2,'triangle',.05,.1);},
+  step(i){if(playBuf('step',{rate:1+i*.12}))return;this.t(520*Math.pow(1.19,i),.14,'triangle',.08);this.n(.08,.06,4000,2);},
+  serif(l){if(playBuf('serif'))return;this.t(700+l*120,.12,'triangle',.06);this.t(1050+l*180,.1,'sine',.03,.04);},
+  blackout(){if(playBuf('blackout'))return;this.t(160,.6,'sawtooth',.05,0,30);this.n(.5,.12,300,.6,0,60);},
+  gimmick(){if(playBuf('gimmick'))return;this.t(2200,.55,'sine',.04,0,500);this.n(.5,.05,3000,3,0,800);},
+  impact(){if(playBuf('impact'))return;this.t(80,.7,'sine',.45,0,32);this.n(.4,.35,250,.7);this.n(.15,.2,2000,.8);},
+  rflash(){if(playBuf('rflash'))return;[88,91,95,100].forEach((n,i)=>this.t(440*Math.pow(2,(n-69)/12),.3,'sine',.03,i*.05));},
+  push(){if(playBuf('push'))return;this.n(.3,.12,800,.8,0,6000);this.t(90,.5,'sine',.35,.18,40);this.chord([76,83,88],.4,'triangle',.05,.18);},
+  win(){if(playBuf('win'))return;this.chord([67,71,74],.2,'sawtooth',.03);this.chord([72,76,79,84],.6,'sawtooth',.035,.18);this.n(.8,.08,6000,.5,.18);},
+  big(){if(playBuf('big'))return;[60,64,67,72,76,79].forEach((n,i)=>this.t(440*Math.pow(2,(n-69)/12),.3,'square',.035,i*.08));
+    this.chord([72,76,79,84],1.4,'sawtooth',.035,.5);this.chord([48,55],1.4,'triangle',.12,.5);this.n(1.4,.1,7000,.5,.5);},
+  lose(){if(playBuf('lose'))return;this.t(392,.35,'triangle',.07,0,330);this.t(330,.6,'triangle',.07,.3,196);},
+  freeze(){if(playBuf('freeze'))return;this.t(55,2.8,'sawtooth',.12,0,28);this.n(2.6,.08,200,.5,0,1600);},
+  count(){if(playBuf('count'))return;this.t(880,.12,'square',.04);this.t(60,.35,'sine',.3,0,40);},
+  tick(v){if(playBuf('tick',{rate:1+Math.min(v,100)/200}))return;this.t(900+v*4,.1,'triangle',.07);},
+  hit(){if(playBuf('hit'))return;this.n(.25,.25,1800,.9,0,400);this.t(300,.25,'sawtooth',.04,0,1500);this.t(70,.3,'sine',.3,.05,40);},
+  damage(){if(playBuf('damage'))return;this.n(.3,.25,500,.8);this.t(1200,.3,'sawtooth',.04,0,200);this.t(60,.35,'sine',.3,0,35);},
 };
 
-/* ================= BGM (モード別の簡易シーケンサー) ================= */
-const BGM={timer:null,song:null,step:0,
+/* ================= BGM ================= */
+/* 登録された音楽ファイルがあればループ再生、なければ内蔵シーケンサー */
+const BGM={timer:null,song:null,step:0,node:null,gain:null,
   songs:{
     NORMAL:{bpm:92,bass:[45,0,0,0,52,0,0,0,41,0,0,0,43,0,0,0],lead:[69,0,72,0,76,0,74,0,72,0,69,0,67,0,0,0]},
     ZENCHO:{bpm:120,bass:[40,40,0,40,40,0,40,0,41,41,0,41,41,0,43,0],lead:[0,0,0,0,64,0,0,0,0,0,0,0,65,0,63,0]},
@@ -427,24 +515,36 @@ const BGM={timer:null,song:null,step:0,
     FANFARE:{bpm:150,bass:[48,60,48,60,53,65,53,65,55,67,55,67,48,60,48,60],lead:[72,76,79,84,0,79,0,76,77,81,84,0,83,0,79,0]},
     HIKI:{bpm:80,bass:[45,0,0,0,0,0,0,0,40,0,0,0,0,0,0,0],lead:[0,0,64,0,0,0,62,0,0,0,60,0,0,0,59,0]},
   },
+  fileKey:{NORMAL:'bgm_normal',ZENCHO:'bgm_zencho',CZ:'bgm_cz',AT:'bgm_at',BATTLE:'bgm_battle',FANFARE:'bgm_bonus',HIKI:'bgm_hiki'},
   pickSong(){
-    if(!S.sound||!S.bgm||document.hidden||!AC)return null;
+    if(!S.sound||!S.bgm||document.hidden||!audioOn||!AC)return null;
     const m=M.mode;
     if(m==='BONUS'||m==='TOKKA'||(m==='AT'&&M.at&&M.at.upper))return'FANFARE';
     return this.songs[m]?m:'NORMAL';
   },
+  stopCur(){
+    clearInterval(this.timer);this.timer=null;
+    if(this.node){const n=this.node,g=this.gain;try{g.gain.setTargetAtTime(0,AC.currentTime,.2);}catch(e){}setTimeout(()=>{try{n.stop();}catch(e){}},1200);this.node=null;}
+  },
   update(){
     const sg=this.pickSong();if(sg===this.song)return;
-    clearInterval(this.timer);this.timer=null;this.song=sg;this.step=0;if(!sg)return;
+    this.stopCur();this.song=sg;this.step=0;if(!sg)return;
+    const buf=SND.buf[this.fileKey[sg]];
+    if(buf){
+      const s=AC.createBufferSource(),g=AC.createGain();s.buffer=buf;s.loop=true;g.gain.value=.0001;
+      g.gain.setTargetAtTime(1,AC.currentTime,.3);s.connect(g).connect(BUS.bgm);s.start();this.node=s;this.gain=g;return;
+    }
     const song=this.songs[sg],dur=60/song.bpm/4;
     this.timer=setInterval(()=>{
       const i=this.step++%16,b=song.bass[i],l=song.lead[i],f=n=>440*Math.pow(2,(n-69)/12);
-      if(b)sfx.t(f(b),dur*.9,'triangle',.035);
-      if(l)sfx.t(f(l),dur*.85,'square',.012);
+      if(b)sfx.t(f(b),dur*.9,'triangle',.07,0,null,BUS.bgm);
+      if(l)sfx.t(f(l),dur*.85,'square',.025,0,null,BUS.bgm);
     },dur*1000);
   }
 };
 document.addEventListener('visibilitychange',()=>BGM.update());
+document.addEventListener('pointerdown',unlockAudio,true);
+document.addEventListener('keydown',unlockAudio,true);
 
 /* ================= reel view ================= */
 const R=[];let H=60;
@@ -718,24 +818,24 @@ function frameLamp(l){$('#lcdWrap').className=l?'lamp'+l:'';}
 function shake(){const a=$('#app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
 function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
 function serif(l,id){const el=$('#serif');el.className='';void el.offsetWidth;el.className='show l'+l;
-  el.innerHTML=`<small>${CHARS[id].short}</small>「${pick(SERIF[l])}」`;sfx.t(700+l*120,.15,'triangle',.05);clearTimeout(serif._t);serif._t=setTimeout(()=>el.className='',2200);}
+  el.innerHTML=`<small>${CHARS[id].short}</small>「${pick(SERIF[l])}」`;sfx.serif(l);clearTimeout(serif._t);serif._t=setTimeout(()=>el.className='',2200);}
 async function stepUp(l,id){
   const el=$('#step');el.className='show';
   el.innerHTML=`<div class="stt">STEP UP</div><div class="boxes">${[1,2,3,4,5].map(i=>`<i class="l${i}"></i>`).join('')}</div>`;
   const bs=el.querySelectorAll('i');
-  for(let i=0;i<l;i++){bs[i].classList.add('on');sfx.t(500+i*180,.12,'square',.05);lcdFlash(i+1);if(i>=2)shake();await sleep(auto?110:260);}
+  for(let i=0;i<l;i++){bs[i].classList.add('on');sfx.step(i);lcdFlash(i+1);if(i>=2)shake();await sleep(auto?110:260);}
   await sleep(auto?120:320);el.className='';
   if(l>=3)cutin(l,id,pick(LINES[l]));
 }
 async function blackout(l,id){
-  const lcd=$('#lcd');lcd.classList.add('bo');R.forEach(r=>r.el.classList.add('dim'));sfx.t(70,.7,'sawtooth',.06,0,40);
+  const lcd=$('#lcd');lcd.classList.add('bo');R.forEach(r=>r.el.classList.add('dim'));sfx.blackout();
   await sleep(auto?300:850);lcd.classList.remove('bo');R.forEach(r=>r.el.classList.remove('dim'));
   lcdFlash(l);shake();cutin(l,id,l>=4?'激熱!!':'…来る!!');
 }
 async function gimmick(l){
   const g=$('#gimmick');g.className='';void g.offsetWidth;g.className='drop l'+l;
-  g.innerHTML='<b>覚醒</b><small>REIJIN</small>';sfx.t(180,.5,'square',.07,0,1400);
-  await sleep(auto?350:650);shake();vib(150);sfx.t(90,.3,'sawtooth',.08);
+  g.innerHTML='<b>覚醒</b><small>REIJIN</small>';sfx.gimmick();
+  await sleep(auto?350:650);shake();vib(150);sfx.impact();
   await sleep(auto?200:450);setTimeout(()=>g.className='',700);
 }
 async function leverFx(g){
@@ -765,17 +865,19 @@ function stopFx(){
 function endFx(g,key){
   document.querySelectorAll('.stop').forEach(b=>b.classList.remove('c2','c3','c4','c5'));
   frameLamp(0);
-  const strong=isS(g.flag)||key.includes('BB')||key.includes('PREM');
+  /* 虹フラッシュは確定(7揃い・プレミア目)のときだけ */
+  const sure=key.includes('BB')||key.includes('PREM'),strong=sure||isS(g.flag);
   if(strong||isW(g.flag)){
-    R.forEach(r=>{r.el.classList.remove('flash','flash2');void r.el.offsetWidth;r.el.classList.add(strong?'flash2':'flash');});
-    setTimeout(()=>R.forEach(r=>r.el.classList.remove('flash','flash2')),1100);
-    if(strong)sfx.t(1200,.3,'square',.04,0,2400);
+    const cls=sure?'flash3':strong?'flash2':'flash';
+    R.forEach(r=>{r.el.classList.remove('flash','flash2','flash3');void r.el.offsetWidth;r.el.classList.add(cls);});
+    setTimeout(()=>R.forEach(r=>r.el.classList.remove('flash','flash2','flash3')),1100);
+    if(strong)sfx.rflash();
   }
 }
 async function freezeFx(){
   if(rnd()<.5){
     /* プレミア: リール逆回転 */
-    sfx.t(400,2,'sawtooth',.05,0,60);$('#lcd').classList.add('bo');
+    sfx.freeze();$('#lcd').classList.add('bo');
     R.forEach(r=>r.state='rev');await sleep(2200);R.forEach(r=>r.state='stop');$('#lcd').classList.remove('bo');
   }else{
     sfx.freeze();$('#lcd').classList.add('freeze');document.body.classList.add('freezeBody');
@@ -788,10 +890,10 @@ async function freezeFx(){
 async function uwanose(add,sub='上乗せ!!'){
   const ov=$('#ov'),steps=[5,10,20,30,50,100].filter(v=>v<add);
   if(add>=20&&rnd()<.6){
-    for(const v of steps.slice(-3)){ov.className='show gold';ov.innerHTML=`<div class="ovt">+${v}G</div><div class="ovs">まだまだ…!</div>`;sfx.t(900+v*4,.1,'square',.05);await sleep(auto?120:300);}
+    for(const v of steps.slice(-3)){ov.className='show gold';ov.innerHTML=`<div class="ovt">+${v}G</div><div class="ovs">まだまだ…!</div>`;sfx.tick(v);await sleep(auto?120:300);}
   }
   if(add>=50){shake();vib(200);}
-  sfx.win();await announce({title:`+${add}G`,sub,cls:add>=50?'rainbow':add>=30?'red':'gold',ms:1100});
+  sfx.win();await announce({title:`+${add}G`,sub,cls:add>=30?'red':'gold',ms:1100});
 }
 let pushRes=null;
 function waitPush(delay=900){return new Promise(res=>{pushRes=res;$('#push').classList.add('on');if(auto)setTimeout(doPush,delay);});}
@@ -811,17 +913,17 @@ function announce({title='',sub='',cls='',char=null,ms=1800}){
 }
 /* PUSH告知。lvでボタン色(3=赤,4=金)、rendaで連打回数 */
 async function pushPhase(text='PUSH!!',{lv=0,renda=0}={}){
-  const ov=$('#ov'),pb=$('#push');pb.classList.remove('p3','p4');if(lv>=3)pb.classList.add('p'+Math.min(4,lv));
+  const ov=$('#ov'),pb=$('#push');pb.classList.remove('p3','p4','p5');if(lv>=3)pb.classList.add('p'+Math.min(5,lv));
   if(!renda){ov.className='show pre';ov.innerHTML=`<div class="ovt">${text}</div><div class="ovs">PUSHボタンを押せ!</div>`;await waitPush();}
   else{
     ov.className='show pre';ov.innerHTML=`<div class="ovt">${text}</div><div class="ovs">PUSH連打!!</div><div class="rbar"><i></i></div>`;
     const bar=ov.querySelector('.rbar i');
     for(let i=0;i<renda;i++){await waitPush(110);bar.style.width=((i+1)/renda*100)+'%';lcdFlash(1+Math.floor(i/renda*4));if(i%3===2)shake();}
   }
-  pb.classList.remove('p3','p4');ov.className='';
+  pb.classList.remove('p3','p4','p5');ov.className='';
 }
-/* 告知時のPUSHの色と連打の有無(結果が良いほど派手) */
-function pushStyle(good){const lv=good?+wpick({0:3,3:4,4:3}):+wpick({0:8,3:2});return{lv,renda:rnd()<(good?.45:.12)?8+rint(5):0};}
+/* 告知時のPUSHの色と連打の有無(結果が良いほど派手)。虹はAT確定(sure)のときだけ */
+function pushStyle(good,sure=good){let lv=good?+wpick({0:3,3:4,4:3}):+wpick({0:8,3:2});if(sure&&rnd()<.15)lv=5;return{lv,renda:rnd()<(good?.45:.12)?8+rint(5):0};}
 function lcdMsg(t,s=''){$('#lcdTitle').textContent=t;$('#lcdSub').textContent=s;clearTimeout(lcdMsg._t);lcdMsg._t=setTimeout(()=>{lcdMsg._t=null;render();},1800);}
 
 /* ================= machine logic ================= */
@@ -894,7 +996,7 @@ async function pZencho(f,W,Sg){
     else lcdMsg(pick(['カイトの攻撃!','魔獣の反撃!','激しい鍔迫り合い!']),'');
   }
   if(z.g<=0){
-    await pushPhase('PUSH!!',pushStyle(good));
+    await pushPhase('PUSH!!',pushStyle(good,z.result==='AT'));
     if(z.result==='AT'){sfx.win();await announce({title:'撃破!!',sub:'AT確定',cls:'gold',char:'kaito',ms:1600});await startAT({why:z.why});}
     else if(z.result==='CZ'){sfx.win();await announce({title:'撃破!!',sub:'霊力解放ZONEへ',cls:'blue',char:'kaito',ms:1400});await startCZ();}
     else{sfx.lose();await announce({title:'撤退…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.zc=null;}
@@ -909,7 +1011,7 @@ async function pCZ(f,W,Sg){
   const pr=({HAZURE:.02,REP:.04,BELL:.025,CHE_W:.35,SUI_W:.3,CHE_S:1,SUI_S:1,CHANCE:.7}[f]||0)+(M.setting-1)*.004;
   if(!c.won&&rnd()<pr)c.won=true;
   c.gauge=Math.min(c.won?100:86,c.gauge+(c.won?12+rint(12):3+rint(8)));
-  if(c.g>0&&c.g<=3&&!(c.won&&Sg)){lcdMsg(String(c.g),'ラストカウント');$('#lcdTitle').classList.add('big');setTimeout(()=>$('#lcdTitle').classList.remove('big'),1800);sfx.t(880,.2,'square',.05);if(c.won&&rnd()<.4)lcdFlash(3);}
+  if(c.g>0&&c.g<=3&&!(c.won&&Sg)){lcdMsg(String(c.g),'ラストカウント');$('#lcdTitle').classList.add('big');setTimeout(()=>$('#lcdTitle').classList.remove('big'),1800);sfx.count();if(c.won&&rnd()<.4)lcdFlash(3);}
   if((c.won&&Sg)||c.g<=0){
     await pushPhase(c.won&&Sg?'霊力解放!!':'PUSH!!',pushStyle(c.won));const h=M.hist.find(x=>x.id===c.hid);
     if(c.won){M.cnt.CZwin++;if(h)h.res='成功';c.gauge=100;sfx.win();await announce({title:'霊力解放 成功!!',sub:'',cls:'gold',char:['kaito','yuki'],ms:1600});await startAT({why:'CZ'});}
@@ -987,8 +1089,8 @@ async function pBattle(f,W,Sg){
   if(!b.win&&((Sg&&rnd()<.5)||(W&&rnd()<.15))){b.win=true;b.rev=true;}
   if(b.g>0){
     shake();
-    if(rnd()<(b.win?.6:.4)){b.hpE=Math.max(12,b.hpE-15-rint(20));lcdMsg(`${ATK[b.ally]}!!`,`${CHARS[b.ally].short}の攻撃`);lcdFlash(b.win&&rnd()<.3?4:3);sfx.t(300,.25,'sawtooth',.06,0,1500);}
-    else{b.hpA=Math.max(12,b.hpA-15-rint(20));lcdMsg(`${ENEMY_ATK[b.enemy]}!!`,`${CHARS[b.enemy].short}の攻撃`);lcdFlash(1);sfx.t(1200,.3,'sawtooth',.06,0,200);}
+    if(rnd()<(b.win?.6:.4)){b.hpE=Math.max(12,b.hpE-15-rint(20));lcdMsg(`${ATK[b.ally]}!!`,`${CHARS[b.ally].short}の攻撃`);lcdFlash(b.win&&rnd()<.3?4:3);sfx.hit();}
+    else{b.hpA=Math.max(12,b.hpA-15-rint(20));lcdMsg(`${ENEMY_ATK[b.enemy]}!!`,`${CHARS[b.enemy].short}の攻撃`);lcdFlash(1);sfx.damage();}
     if(b.g===1)serif(b.win&&rnd()<.3?4:3,b.ally);
     return;
   }
@@ -1128,7 +1230,7 @@ function openMenu(){
   <h3>オプション</h3>
   ${sw('sound','サウンド')}${sw('bgm','BGM')}${sw('assist','目押しサポート（OFFで最大4コマ滑りの実機制御）')}${sw('wait','4.1秒ウェイト')}
   <h3>その他</h3>
-  <div class="grid6"><button class="sbtn" id="bHelp" style="grid-column:span 2">遊び方・解析</button><button class="sbtn" id="bResetData" style="grid-column:span 2">データクリア</button></div>
+  <div class="grid6"><button class="sbtn" id="bSounds" style="grid-column:span 4">効果音・BGMを登録（他のAIで作った音）</button><button class="sbtn" id="bHelp" style="grid-column:span 2">遊び方・解析</button><button class="sbtn" id="bResetData" style="grid-column:span 2">データクリア</button></div>
   <p style="color:#8a84a0;font-size:11px">オリジナルのパチスロ風シミュレーターです。本物のお金は使いません。</p>`);
 }
 async function copyText(t){
@@ -1145,6 +1247,38 @@ function openChars(){
   ${Object.keys(CHARS).map(id=>`<div class="charRow"><div class="th">${charHTML(id)}</div><div><b>${CHARS[id].name}</b></div>
   <div><button class="sbtn" data-copy="${id}">コピー</button> <label class="sbtn" style="display:inline-flex;align-items:center;padding:0 10px">登録<input type="file" accept="image/*" data-up="${id}" hidden></label>
   ${imgSrc[id]&&imgSrc[id].startsWith('data:')?`<button class="sbtn" data-del="${id}">削除</button>`:''}</div></div>`).join('')}`);
+}
+function openSounds(){
+  const row=x=>{const src=SND.src[x.key],st=src==='user'?'<span class="hl">登録済み</span>':src==='file'?'<span class="hl">ファイル</span>':'<span style="color:#8a84a0">内蔵音</span>';
+    return`<div class="charRow" style="grid-template-columns:1fr auto"><div><b>${x.label}</b> ${st}<br><small style="color:#8a84a0">${x.key}.mp3</small></div>
+    <div><button class="sbtn" data-splay="${x.key}">▶</button> <button class="sbtn" data-scopy="${x.key}">コピー</button> <label class="sbtn" style="display:inline-flex;align-items:center;padding:0 10px">登録<input type="file" accept="audio/*" data-sup="${x.key}" hidden></label>${src==='user'?` <button class="sbtn" data-sdel="${x.key}">削除</button>`:''}</div></div>`;};
+  openModal('効果音・BGM',`
+  <p>他のAIで作った音を登録すると、内蔵の音と入れ替わります。「コピー」を押すと、そのAI用のプロンプト（英語）がコピーされます。</p>
+  <div class="prompt">おすすめのAI\n・BGM → <span class="hl">Suno</span> / <span class="hl">Udio</span>（歌なしのInstrumentalで作る）\n・効果音 → <span class="hl">ElevenLabs Sound Effects</span> / <span class="hl">Stable Audio</span>\n作った音をmp3などで保存して「登録」してください。BGMはループ再生されます。\n※既存のアニメ曲の曲名やアーティスト名はプロンプトに入れないでください。</div>
+  <h3>音量</h3>
+  <div class="opt"><span>効果音</span><input type="range" min="0" max="1" step="0.05" value="${S.seVol}" data-vol="seVol"></div>
+  <div class="opt"><span>BGM</span><input type="range" min="0" max="1" step="0.05" value="${S.bgmVol}" data-vol="bgmVol"></div>
+  <h3>BGM</h3>${SOUNDS.filter(x=>x.type==='bgm').map(row).join('')}
+  <h3>効果音</h3>${SOUNDS.filter(x=>x.type==='se').map(row).join('')}`);
+}
+let previewNode=null;
+function previewSound(key){
+  ac();unlockAudio();
+  if(previewNode){try{previewNode.stop();}catch(e){}previewNode=null;}
+  const def=SOUNDS.find(x=>x.key===key),b=SND.buf[key];
+  if(b&&BUS){const n=AC.createBufferSource();n.buffer=b;n.connect(def.type==='bgm'?BUS.bgm:BUS.se);n.start();previewNode=n;if(def.type==='bgm')setTimeout(()=>{if(previewNode===n){try{n.stop();}catch(e){}previewNode=null;}},10000);return;}
+  const demo={pay:()=>sfx.pay(9),cut_low:()=>sfx.cut(1),cut_high:()=>sfx.cut(3),cut_rainbow:()=>sfx.cut(5),step:()=>sfx.step(2),serif:()=>sfx.serif(3),tick:()=>sfx.tick(20)}[key];
+  if(demo)demo();else if(typeof sfx[key]==='function')sfx[key]();else toast('未登録のBGMは内蔵の曲が流れます');
+}
+async function uploadSound(key,file){
+  ac();
+  try{
+    const ab=await file.arrayBuffer(),buf=await decodeAudio(ab.slice(0));
+    await DB.put(key,ab,'snd');SND.buf[key]=buf;SND.src[key]='user';
+    if(BGM.fileKey[BGM.song]===key){BGM.song=undefined;BGM.update();}
+    toast(`${SOUNDS.find(x=>x.key===key).label} を登録しました`);
+  }catch(e){toast('この音声ファイルは読み込めませんでした（mp3 / m4a / wav がおすすめ）');}
+  openSounds();
 }
 function openHelp(){
   openModal('遊び方・解析',`
@@ -1174,7 +1308,11 @@ function openHelp(){
 }
 $('#mbody').addEventListener('click',async e=>{
   const t=e.target;
-  if(t.dataset.sw){S[t.dataset.sw]=!S[t.dataset.sw];jsave(SSAVE,S);ac();BGM.update();openMenu();}
+  if(t.dataset.sw){S[t.dataset.sw]=!S[t.dataset.sw];jsave(SSAVE,S);ac();applyVol();BGM.update();openMenu();}
+  else if(t.id==='bSounds')openSounds();
+  else if(t.dataset.splay)previewSound(t.dataset.splay);
+  else if(t.dataset.scopy){const x=SOUNDS.find(y=>y.key===t.dataset.scopy);if(await copyText(x.prompt)){t.textContent='✓済';toast(`${x.label} のプロンプトをコピーしました`);}else{const b=document.querySelector('#mbody .prompt');b.textContent=x.prompt;b.scrollIntoView({block:'center'});toast('コピーできませんでした。上の文章を長押しして選択してください');}}
+  else if(t.dataset.sdel){const k=t.dataset.sdel;await DB.del(k,'snd');delete SND.buf[k];delete SND.src[k];if(BGM.fileKey[BGM.song]===k){BGM.song=undefined;BGM.update();}openSounds();}
   else if(t.dataset.set!=null){if(busy)return toast('ゲーム中は変更できません');const s=+t.dataset.set||1+rint(6);if(+t.dataset.set===0){S.showSet=false;jsave(SSAVE,S);}
     M.setting=s;toNormal();M.hamari=0;save();render();toast(+t.dataset.set?`設定${s}に変更しました`:'ランダム設定にしました（非公開）');openMenu();}
   else if(t.id==='bHelp')openHelp();
@@ -1184,7 +1322,9 @@ $('#mbody').addEventListener('click',async e=>{
     else{const box=document.querySelector('#mbody .prompt .hl');box.textContent=prompt(id);box.scrollIntoView({block:'center'});toast('コピーできませんでした。例の文章を長押しして選択してください');}}
   else if(t.dataset.del){await DB.del(t.dataset.del);delete imgSrc[t.dataset.del];await loadImages();openChars();}
 });
+$('#mbody').addEventListener('input',e=>{const k=e.target.dataset.vol;if(!k)return;S[k]=+e.target.value;jsave(SSAVE,S);applyVol();});
 $('#mbody').addEventListener('change',async e=>{
+  if(e.target.dataset.sup&&e.target.files[0])return uploadSound(e.target.dataset.sup,e.target.files[0]);
   const id=e.target.dataset.up;if(!id||!e.target.files[0])return;
   try{const d=await fileToDataURL(e.target.files[0]);await DB.put(id,d);imgSrc[id]=d;lastChars={};render();openChars();toast(`${CHARS[id].name} を登録しました`);}
   catch(err){toast('画像を読み込めませんでした');}
@@ -1212,7 +1352,7 @@ document.addEventListener('keydown',e=>{
 });
 window.addEventListener('resize',()=>{measure();FX.resize();});
 
-buildReels();FX.init();render();requestAnimationFrame(frame);loadImages();
+buildReels();FX.init();render();requestAnimationFrame(frame);loadImages().then(()=>SND.load());
 </script>
 </body>
 </html>
