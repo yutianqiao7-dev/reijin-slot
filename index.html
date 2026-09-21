@@ -216,7 +216,30 @@ body.freezeBody .reel{filter:brightness(.2)}
 .rbar{width:70%;height:14px;border:2px solid #fff;border-radius:8px;margin-top:10px;overflow:hidden;background:#0008}
 .rbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffec3b,#ff3b3b);transition:width .1s}
 #lcdTitle.big{font-size:clamp(40px,14vw,64px)}
-.tag.at{background:#ff6a00;color:#000}.tag.up{background:linear-gradient(90deg,#ff3b3b,#ffb33b,#3bd4ff)}.tag.cz{background:#1a6bff}.tag.ng{background:#444}
+.tag.at{background:#ff6a00;color:#000}
+.tabs{display:flex;gap:4px;overflow-x:auto;position:sticky;top:-12px;background:#15131d;padding:6px 0 8px;margin-top:-6px;z-index:2}
+.tab{flex:none;padding:6px 10px;border-radius:14px;border:1px solid #3b3452;background:#1d1a28;font-size:12px;font-weight:700}
+.tab.on{background:#ff6a00;border-color:#ffb36b;color:#000}
+.ana table{margin-bottom:4px}.ana th{color:#cfc8e6;font-weight:700;white-space:nowrap;background:#1b1826}.ana td{color:#fff}
+.ana th small{color:#8a84a0;font-weight:400}
+.note{color:#8a84a0;font-size:11px;margin:4px 0 0}
+.cc{display:inline-block;min-width:34px;text-align:center;border-radius:4px;padding:1px 6px;color:#000;font-weight:900}
+.cc.c1{background:#1a6bff;color:#fff}.cc.c2{background:#19c25a}.cc.c3{background:#ff1a2e;color:#fff}.cc.c4{background:#ffc400}
+.cc.c5{background:linear-gradient(90deg,#ff3b3b,#fffa6b,#3bff8a,#3bd4ff,#ff3bd0)}
+.flow{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0}
+.fn{width:92%;border-radius:10px;padding:8px;text-align:center;font-weight:900;border:2px solid;background:#1b1826}
+.fn small{display:block;font-weight:400;font-size:11px;color:#cfc8e6;margin-top:2px}
+.fn.n{border-color:#6b8aff}.fn.z{border-color:#e8e2d0}.fn.c{border-color:#39c6ff}.fn.a{border-color:#ff8a1a;background:#2a1408}
+.fn.b{border-color:#ff2d55}.fn.h{border-color:#8a96b0}.fn.g{border-color:#555;color:#aaa}
+.fa{color:#ffb36b;font-size:12px;font-weight:700}.fa.up{color:#3bff8a}
+.fb{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;width:92%}
+.fb span{font-size:10px;background:#241f33;border:1px solid #3b3452;border-radius:10px;padding:2px 8px}
+.fsplit{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:92%;text-align:center}
+.fsplit.two{grid-template-columns:1fr 1fr}
+.fsplit .fn{width:100%;font-size:12px}
+.fnote{width:92%;font-size:11px;color:#cfc8e6;background:#1b1826;border:1px dashed #3b3452;border-radius:8px;padding:8px;margin-top:6px;line-height:1.7}
+#mbody details{border-bottom:1px solid var(--line)}#mbody summary{padding:8px 0;font-weight:700;cursor:pointer}
+.vline{color:#ffd28a;font-size:12px}.tag.up{background:linear-gradient(90deg,#ff3b3b,#ffb33b,#3bd4ff)}.tag.cz{background:#1a6bff}.tag.ng{background:#444}
 </style>
 </head>
 <body>
@@ -385,11 +408,22 @@ function chooseStop(ri,press,centers,t){
 const SAVE='reijinSlot.v1',SSAVE='reijinSlot.settings';
 const ORDERS=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
 const TENJO={A:800,B:600,C:400,H:150};
+/* 抽選値(ゲーム本体と解析ページで共通) */
+const tenjoWeights=s=>({A:52-3*s,B:30,C:14,H:4+2*s});
+function flagTable(s){return{BELL:.58,REP:1/7.3,CHE_W:1/(86-2*s),CHE_S:1/260,SUI_W:1/95,SUI_S:1/300,CHANCE:1/190,FREEZE:1/16384};}
+const DIRECT_AT={CHE_W:.004,SUI_W:.003,CHE_S:.015,SUI_S:.012,CHANCE:.008};
+const CZ_RATE={CHE_W:[.04,.12,.30],SUI_W:[.03,.10,.25],CHE_S:[.25,.45,.75],SUI_S:[.20,.40,.70],CHANCE:[.10,.25,.45]};
+const PERIOD_AT={A:.03,B:.06,C:.10,H:.30};
+const CZ_WIN={HAZURE:.02,REP:.04,BELL:.025,CHE_W:.35,SUI_W:.3,CHE_S:1,SUI_S:1,CHANCE:.7};
+const KEIZOKU=[50,66,75,80,90];
+function keizokuWeights(s){const w1=[38,35,17,8,2],w6=[30,35,21,10,4],t=(s-1)/5,w={};KEIZOKU.forEach((k,i)=>w[k]=w1[i]+(w6[i]-w1[i])*t);return w;}
+const ENEMY_W={win:{jaguard:4,nox:3,amane:2,varga:1},lose:{jaguard:1,nox:2,amane:3,varga:4}};
+const hikiRate=s=>.08+.012*(s-1);
 const AT_MODES=['AT','BATTLE','BONUS','TOKKA'];
-let S=Object.assign({sound:true,bgm:true,seVol:.8,bgmVol:.5,assist:true,wait:false,showSet:false},jload(SSAVE)||{});
+let S=Object.assign({sound:true,bgm:true,seVol:.8,bgmVol:.5,voiceVol:1,assist:true,wait:false,showSet:false},jload(SSAVE)||{});
 function jload(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
 function jsave(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function pickTenjoMode(s){return wpick({A:52-3*s,B:30,C:14,H:4+2*s});}
+function pickTenjoMode(s){return wpick(tenjoWeights(s));}
 function newState(setting){return{v:1,setting:setting||1+rint(6),credits:0,invest:0,inT:0,outT:0,games:0,hamari:0,
   mode:'NORMAL',kk:'low',kkG:0,tmode:pickTenjoMode(1),point:0,zc:null,cz:null,at:null,battle:null,bonus:null,tokka:null,hiki:null,
   yuuriG:0,replay:false,hid:0,
@@ -433,6 +467,35 @@ const SOUNDS=[
   {key:'hit',type:'se',label:'バトル攻撃',prompt:'anime sword slash with energy blast impact, 0.8 seconds'},
   {key:'damage',type:'se',label:'バトル被弾',prompt:'dark energy blast hitting hard, heavy impact, 0.8 seconds'},
 ];
+/* キャラボイス: キャラ×場面ごとの枠。登録した音声ファイルだけが鳴る */
+const VOICE_SIT={cut:'予告・カットイン',attack:'バトル攻撃',win:'勝利・告知成功',lose:'敗北・失敗',big:'AT突入・ボーナス',end:'終了画面',appear:'登場'};
+const VOICE_LINES={
+  kaito:{cut:'来るぞ…構えろ!',win:'俺の勝ちだ!',lose:'くそっ…まだ終わってねぇ!',big:'ここからが本番だ!',end:'また来いよ'},
+  yuki:{cut:'油断するな!',win:'よし、見事だ!',lose:'不覚…!',big:'行くぞ、ついて来い!',end:'次も期待しているぞ'},
+  ren:{cut:'へっ、面白くなってきたぜ!',win:'どうだ、見たか!',lose:'ちくしょう…!',big:'暴れさせてもらうぜ!',end:'また一緒に戦おうぜ'},
+  shion:{cut:'…見切った',win:'当然の結果だ',lose:'…不覚',big:'見せてやろう',end:'…悪くない'},
+  toya:{cut:'気を抜くな',win:'終わりだ',lose:'…ここまでか',big:'全力で行く',end:'…また来い'},
+  gou:{cut:'楽しませてくれよ!',win:'もう終わりか、つまらねぇな',lose:'ハッ…いい勝負だったぜ',big:'さあ、斬り合おうぜ!',end:'また斬り合おうぜ'},
+  amane:{appear:'待っていたよ',win:'全て計算通りだ',lose:'…見事だ',end:'君の選択は正しい'},
+  jaguard:{appear:'出てこいよ!',win:'弱ぇな!',lose:'てめぇ…!'},
+  nox:{appear:'…来たか',win:'それが限界か',lose:'…そうか'},
+  varga:{appear:'すべては我が掌の上',win:'未来は変わらぬ',lose:'…ありえぬ'},
+};
+const ALLIES=['kaito','yuki','ren','shion','toya','gou'];
+function voiceSlots(id){
+  const sits=ALLIES.includes(id)?['cut','attack','win','lose','big','end']:['appear','attack','win','lose'].concat(ENDINGS_IDS.includes(id)?['end']:[]);
+  return sits.map(sit=>({key:`v_${id}_${sit}`,id,sit,label:VOICE_SIT[sit],line:sit==='attack'?`${ATK[id]||ENEMY_ATK[id]}!!`:VOICE_LINES[id][sit]}));
+}
+const ENDINGS_IDS=['kaito','yuki','ren','shion','toya','gou','amane'];
+const VOICES=Object.keys(CHARS).flatMap(voiceSlots);
+let voiceNode=null;
+function voice(id,sit){
+  const b=SND.buf[`v_${id}_${sit}`];if(!b||!S.sound||!BUS)return false;
+  try{if(voiceNode)voiceNode.stop();}catch(e){}
+  try{const s=AC.createBufferSource();s.buffer=b;s.connect(BUS.voice);s.start();voiceNode=s;}catch(e){}
+  return true;
+}
+const soundLabel=k=>{const x=SOUNDS.find(y=>y.key===k);if(x)return x.label;const v=VOICES.find(y=>y.key===k);return v?`${CHARS[v.id].short}「${v.label}」`:k;};
 let AC=null,BUS=null,audioOn=false;
 function ac(){
   if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();buildBus();}catch(e){AC=null;}}
@@ -441,25 +504,26 @@ function ac(){
 function unlockAudio(){if(audioOn)return;audioOn=true;ac();BGM.update();}
 function buildBus(){
   const a=AC,comp=a.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;comp.connect(a.destination);
-  const master=a.createGain(),se=a.createGain(),bgm=a.createGain(),synth=a.createGain();
-  master.connect(comp);se.connect(master);bgm.connect(master);synth.connect(se);
+  const master=a.createGain(),se=a.createGain(),bgm=a.createGain(),synth=a.createGain(),voice=a.createGain();
+  master.connect(comp);se.connect(master);bgm.connect(master);voice.connect(master);synth.connect(se);
   /* 内蔵シンセ用の簡易リバーブ */
   const len=Math.floor(a.sampleRate*1.4),ir=a.createBuffer(2,len,a.sampleRate);
   for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);}
   const rev=a.createConvolver(),send=a.createGain();rev.buffer=ir;send.gain.value=.25;synth.connect(send);send.connect(rev);rev.connect(se);
   const nb=a.createBuffer(1,a.sampleRate,a.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
-  BUS={master,se,bgm,synth,rev:send,noise:nb};applyVol();
+  BUS={master,se,bgm,synth,voice,rev:send,noise:nb};applyVol();
 }
-function applyVol(){if(!BUS)return;BUS.se.gain.value=S.sound?S.seVol:0;BUS.bgm.gain.value=(S.sound&&S.bgm)?S.bgmVol:0;}
+function applyVol(){if(!BUS)return;BUS.se.gain.value=S.sound?S.seVol:0;BUS.bgm.gain.value=(S.sound&&S.bgm)?S.bgmVol:0;BUS.voice.gain.value=S.sound?S.voiceVol:0;}
 function decodeAudio(ab){return new Promise((res,rej)=>{try{const p=AC.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej);}catch(e){rej(e);}});}
 const SND={buf:{},src:{},
   async load(){
     if(!ac())return;
-    for(const s of SOUNDS){
-      const d=await DB.get(s.key,'snd');
-      if(d){try{this.buf[s.key]=await decodeAudio(d.slice(0));this.src[s.key]='user';continue;}catch(e){}}
-      try{const r=await fetch(`assets/sounds/${s.key}.mp3`);if(r.ok){this.buf[s.key]=await decodeAudio(await r.arrayBuffer());this.src[s.key]='file';}}catch(e){}
-    }
+    const all=[...SOUNDS.map(x=>({key:x.key,url:`assets/sounds/${x.key}.mp3`})),...VOICES.map(v=>({key:v.key,url:`assets/voices/${v.id}_${v.sit}.mp3`}))];
+    await Promise.all(all.map(async x=>{
+      const d=await DB.get(x.key,'snd');
+      if(d){try{this.buf[x.key]=await decodeAudio(d.slice(0));this.src[x.key]='user';return;}catch(e){}}
+      try{const r=await fetch(x.url);if(r.ok){this.buf[x.key]=await decodeAudio(await r.arrayBuffer());this.src[x.key]='file';}}catch(e){}
+    }));
     BGM.song=undefined;BGM.update();
   }
 };
@@ -712,7 +776,7 @@ const FX={cv:null,c:null,w:1,h:1,ps:[],mode:'',t:0,flash:0,nextEv:3,shoot:null,b
 let G=null,busy=false,auto=false,lastLever=0;
 function rollFlag(){
   const s=M.setting;
-  const t={BELL:.58,REP:1/7.3,CHE_W:1/(86-2*s),CHE_S:1/260,SUI_W:1/95,SUI_S:1/300,CHANCE:1/190,FREEZE:1/16384};
+  const t=flagTable(s);
   let r=rnd();for(const k in t){r-=t[k];if(r<0)return k;}return'HAZURE';
 }
 const isW=f=>f==='CHE_W'||f==='SUI_W';
@@ -787,7 +851,7 @@ function settle(p,key){
 let cutT=null,fxT=null;
 const LINES={1:['霊力反応…?','ん…?','何か感じる…'],2:['霊力が上がっていく!','気配がする…!','来るか…!?'],3:['チャンス!!','霊力が膨れ上がる!!','覚醒の気配…!'],4:['激熱!!','とんでもねぇ霊力だ!!'],5:['―――覚醒―――']};
 function cutin(l,id,text){const el=$('#cut');el.className='';void el.offsetWidth;el.className='show lv'+l;
-  el.innerHTML=`<div class="cc">${charHTML(id)}</div><div class="ct">${text}</div>`;sfx.cut(l);clearTimeout(cutT);cutT=setTimeout(()=>el.className='',1300);}
+  el.innerHTML=`<div class="cc">${charHTML(id)}</div><div class="ct">${text}</div>`;sfx.cut(l);voice(id,'cut');clearTimeout(cutT);cutT=setTimeout(()=>el.className='',1300);}
 function lcdFlash(l){const lcd=$('#lcd');lcd.classList.remove('fx1','fx2','fx3','fx4','fx5');lcd.classList.add('fx'+l);clearTimeout(fxT);fxT=setTimeout(()=>lcd.classList.remove('fx'+l),900);}
 /* 期待度: 0=なし 1=青 2=緑 3=赤 4=金 5=虹(確定) */
 function calcHeat(g){
@@ -818,7 +882,7 @@ function frameLamp(l){$('#lcdWrap').className=l?'lamp'+l:'';}
 function shake(){const a=$('#app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
 function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
 function serif(l,id){const el=$('#serif');el.className='';void el.offsetWidth;el.className='show l'+l;
-  el.innerHTML=`<small>${CHARS[id].short}</small>「${pick(SERIF[l])}」`;sfx.serif(l);clearTimeout(serif._t);serif._t=setTimeout(()=>el.className='',2200);}
+  el.innerHTML=`<small>${CHARS[id].short}</small>「${pick(SERIF[l])}」`;sfx.serif(l);voice(id,'cut');clearTimeout(serif._t);serif._t=setTimeout(()=>el.className='',2200);}
 async function stepUp(l,id){
   const el=$('#step');el.className='show';
   el.innerHTML=`<div class="stt">STEP UP</div><div class="boxes">${[1,2,3,4,5].map(i=>`<i class="l${i}"></i>`).join('')}</div>`;
@@ -884,7 +948,7 @@ async function freezeFx(){
     await sleep(2600);$('#lcd').classList.remove('freeze');document.body.classList.remove('freezeBody');
   }
   vib([100,50,100,50,300]);shake();$('#logo').classList.add('on');frameLamp(5);
-  await announce({title:'覚 醒',sub:'REIJIN FREEZE',cls:'rainbow',char:'kaito',ms:2000});
+  voice('kaito','big');await announce({title:'覚 醒',sub:'REIJIN FREEZE',cls:'rainbow',char:'kaito',ms:2000});
 }
 /* 上乗せ: 数字が段階的に増える演出 */
 async function uwanose(add,sub='上乗せ!!'){
@@ -964,15 +1028,15 @@ async function pNormal(f,W,Sg){
   M.point+=1+(W?10:0)+(Sg?30:0);
   let res=null,why='通常';const bo=1+(M.setting-1)*.03;
   if(W||Sg){
-    const d={CHE_W:.004,SUI_W:.003,CHE_S:.015,SUI_S:.012,CHANCE:.008}[f]*bo;
+    const d=DIRECT_AT[f]*bo;
     if(rnd()<d){res='AT';why='レア役直撃';}
-    else{const t={CHE_W:[.04,.12,.30],SUI_W:[.03,.10,.25],CHE_S:[.25,.45,.75],SUI_S:[.20,.40,.70],CHANCE:[.10,.25,.45]}[f][{low:0,high:1,super:2}[M.kk]];if(rnd()<t*bo)res='CZ';}
+    else{const t=CZ_RATE[f][{low:0,high:1,super:2}[M.kk]];if(rnd()<t*bo)res='CZ';}
     if(Sg){if(rnd()<.25){M.kk='super';M.kkG=20+rint(20);}else if(rnd()<.6){if(M.kk!=='super')M.kk='high';M.kkG=Math.max(M.kkG,15+rint(20));}}
     else if(rnd()<.3){if(M.kk==='low')M.kk='high';M.kkG=Math.max(M.kkG,10+rint(15));}
     lcdMsg(Sg?'霊力急上昇!!':'霊力上昇','');
   }
   if(!res&&M.point>=300){
-    M.point=0;const pa={A:.03,B:.06,C:.10,H:.30}[M.tmode]+(M.setting-1)*.004,r=rnd();
+    M.point=0;const pa=PERIOD_AT[M.tmode]+(M.setting-1)*.004,r=rnd();
     if(r<pa){res='AT';why='周期';}else if(r<pa+.22+(M.setting-1)*.01)res='CZ';else if(rnd()<.4)res='NONE';
     else lcdMsg('霊力周期…','反応なし');
   }
@@ -988,7 +1052,7 @@ async function pZencho(f,W,Sg){
     /* 連続演出の開始: 次回予告。タイトルの色が期待度 */
     z.enemy=z.result==='AT'?wpick({jaguard:2,nox:3,amane:3}):wpick({jaguard:5,nox:2,amane:1});
     const col=z.result==='AT'?wpick({gold:3,red:5,blue:2}):z.result==='CZ'?wpick({red:3,blue:7}):wpick({red:1,blue:6,dark:3});
-    await announce({title:pick(['「決戦の刻」','「守るべきもの」','「黒き月」','「霊力の果て」','「反撃の狼煙」']),sub:'次回予告',cls:col,char:z.enemy,ms:1800});
+    voice(z.enemy,'appear');await announce({title:pick(['「決戦の刻」','「守るべきもの」','「黒き月」','「霊力の果て」','「反撃の狼煙」']),sub:'次回予告',cls:col,char:z.enemy,ms:1800});
     lcdFlash(good?3:2);lcdMsg('魔獣 出現!!','VS 大魔獣');
   }else if(z.g>0&&z.g<3){
     shake();
@@ -997,9 +1061,9 @@ async function pZencho(f,W,Sg){
   }
   if(z.g<=0){
     await pushPhase('PUSH!!',pushStyle(good,z.result==='AT'));
-    if(z.result==='AT'){sfx.win();await announce({title:'撃破!!',sub:'AT確定',cls:'gold',char:'kaito',ms:1600});await startAT({why:z.why});}
-    else if(z.result==='CZ'){sfx.win();await announce({title:'撃破!!',sub:'霊力解放ZONEへ',cls:'blue',char:'kaito',ms:1400});await startCZ();}
-    else{sfx.lose();await announce({title:'撤退…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.zc=null;}
+    if(z.result==='AT'){sfx.win();voice('kaito','win');await announce({title:'撃破!!',sub:'AT確定',cls:'gold',char:'kaito',ms:1600});await startAT({why:z.why});}
+    else if(z.result==='CZ'){sfx.win();voice('kaito','win');await announce({title:'撃破!!',sub:'霊力解放ZONEへ',cls:'blue',char:'kaito',ms:1400});await startCZ();}
+    else{sfx.lose();voice('kaito','lose');await announce({title:'撤退…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.zc=null;}
   }
 }
 async function startCZ(){
@@ -1008,17 +1072,17 @@ async function startCZ(){
 }
 async function pCZ(f,W,Sg){
   M.hamari++;const c=M.cz;c.g--;
-  const pr=({HAZURE:.02,REP:.04,BELL:.025,CHE_W:.35,SUI_W:.3,CHE_S:1,SUI_S:1,CHANCE:.7}[f]||0)+(M.setting-1)*.004;
+  const pr=(CZ_WIN[f]||0)+(M.setting-1)*.004;
   if(!c.won&&rnd()<pr)c.won=true;
   c.gauge=Math.min(c.won?100:86,c.gauge+(c.won?12+rint(12):3+rint(8)));
   if(c.g>0&&c.g<=3&&!(c.won&&Sg)){lcdMsg(String(c.g),'ラストカウント');$('#lcdTitle').classList.add('big');setTimeout(()=>$('#lcdTitle').classList.remove('big'),1800);sfx.count();if(c.won&&rnd()<.4)lcdFlash(3);}
   if((c.won&&Sg)||c.g<=0){
     await pushPhase(c.won&&Sg?'霊力解放!!':'PUSH!!',pushStyle(c.won));const h=M.hist.find(x=>x.id===c.hid);
-    if(c.won){M.cnt.CZwin++;if(h)h.res='成功';c.gauge=100;sfx.win();await announce({title:'霊力解放 成功!!',sub:'',cls:'gold',char:['kaito','yuki'],ms:1600});await startAT({why:'CZ'});}
-    else{if(h)h.res='失敗';sfx.lose();await announce({title:'失敗…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.cz=null;}
+    if(c.won){M.cnt.CZwin++;if(h)h.res='成功';c.gauge=100;sfx.win();voice('kaito','win');await announce({title:'霊力解放 成功!!',sub:'',cls:'gold',char:['kaito','yuki'],ms:1600});await startAT({why:'CZ'});}
+    else{if(h)h.res='失敗';sfx.lose();voice('yuki','lose');await announce({title:'失敗…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.cz=null;}
   }
 }
-function pickKeizoku(s){const w1=[38,35,17,8,2],w6=[30,35,21,10,4],t=(s-1)/5,w={};[50,66,75,80,90].forEach((k,i)=>w[k]=w1[i]+(w6[i]-w1[i])*t);return+wpick(w);}
+function pickKeizoku(s){return+wpick(keizokuWeights(s));}
 async function startAT({upper=false,tokka=false,why='通常'}={}){
   const fromHiki=M.mode==='HIKI';
   M.cnt.AT++;
@@ -1026,7 +1090,7 @@ async function startAT({upper=false,tokka=false,why='通常'}={}){
   M.at={setG:15,keizoku:upper?85:pickKeizoku(M.setting),stock:0,upper,sets:1,startDiff:diff(),totalG:0,pendingBB:false,hid};
   if(!fromHiki)M.yuuriG=0;
   M.mode='AT';M.hamari=0;M.zc=null;M.cz=null;M.hiki=null;M.battle=null;M.kk='low';M.kkG=0;M.point=0;
-  sfx.big();
+  sfx.big();voice('kaito','big');
   await announce({title:upper?'真・覚醒RUSH':'REIJIN RUSH',sub:`突入!!  継続率 ${M.at.keizoku}%`,cls:upper?'rainbow':'gold',char:'kaito',ms:2600});
   if(tokka)await startTokka();
 }
@@ -1050,7 +1114,7 @@ async function pAT(f,W,Sg,key){
   if(a.setG<=0&&!a.pendingBB)await startBattle();
 }
 async function startBonus(){
-  M.cnt.BB++;$('#logo').classList.add('on');sfx.big();
+  M.cnt.BB++;$('#logo').classList.add('on');sfx.big();voice('kaito','big');
   await announce({title:'覚醒BONUS',sub:'START!!',cls:'rainbow',char:'kaito',ms:2000});
   M.mode='BONUS';M.bonus={g:25,startDiff:diff()};
   if(!M.at.upper&&rnd()<.02){M.at.upper=true;M.at.keizoku=Math.max(M.at.keizoku,85);await announce({title:'真・覚醒RUSH 昇格!!',sub:'継続率85%',cls:'rainbow',ms:2000});}
@@ -1066,7 +1130,7 @@ async function pBonus(f,W,Sg){
   }
 }
 async function startTokka(){
-  sfx.big();await announce({title:'桜吹雪ラッシュ',sub:'上乗せ特化ゾーン 10G',cls:'pink',char:'shion',ms:2200});
+  sfx.big();voice('shion','big');await announce({title:'桜吹雪ラッシュ',sub:'上乗せ特化ゾーン 10G',cls:'pink',char:'shion',ms:2200});
   M.mode='TOKKA';M.tokka={g:10,total:0};
 }
 async function pTokka(f){
@@ -1079,9 +1143,9 @@ async function pTokka(f){
 async function startBattle(){
   const a=M.at;let win,byStock=false;
   if(a.stock>0){win=true;byStock=true;a.stock--;}else win=rnd()*100<a.keizoku;
-  const enemy=win?wpick({jaguard:4,nox:3,amane:2,varga:1}):wpick({jaguard:1,nox:2,amane:3,varga:4});
+  const enemy=wpick(win?ENEMY_W.win:ENEMY_W.lose);
   const ally=a.upper?wpick({kaito:6,shion:2,toya:2,gou:2}):wpick({kaito:5,yuki:2,ren:2,shion:2,toya:2,gou:2});
-  M.battle={g:5,win,byStock,enemy,ally,hpA:100,hpE:100};M.mode='BATTLE';
+  M.battle={g:5,win,byStock,enemy,ally,hpA:100,hpE:100};M.mode='BATTLE';voice(enemy,'appear');
   await announce({title:`VS ${CHARS[enemy].name}`,sub:`決戦バトル  継続率${a.keizoku}%`,cls:'red',char:[ally,enemy],ms:1800});
 }
 async function pBattle(f,W,Sg){
@@ -1089,8 +1153,8 @@ async function pBattle(f,W,Sg){
   if(!b.win&&((Sg&&rnd()<.5)||(W&&rnd()<.15))){b.win=true;b.rev=true;}
   if(b.g>0){
     shake();
-    if(rnd()<(b.win?.6:.4)){b.hpE=Math.max(12,b.hpE-15-rint(20));lcdMsg(`${ATK[b.ally]}!!`,`${CHARS[b.ally].short}の攻撃`);lcdFlash(b.win&&rnd()<.3?4:3);sfx.hit();}
-    else{b.hpA=Math.max(12,b.hpA-15-rint(20));lcdMsg(`${ENEMY_ATK[b.enemy]}!!`,`${CHARS[b.enemy].short}の攻撃`);lcdFlash(1);sfx.damage();}
+    if(rnd()<(b.win?.6:.4)){b.hpE=Math.max(12,b.hpE-15-rint(20));lcdMsg(`${ATK[b.ally]}!!`,`${CHARS[b.ally].short}の攻撃`);lcdFlash(b.win&&rnd()<.3?4:3);sfx.hit();voice(b.ally,'attack');}
+    else{b.hpA=Math.max(12,b.hpA-15-rint(20));lcdMsg(`${ENEMY_ATK[b.enemy]}!!`,`${CHARS[b.enemy].short}の攻撃`);lcdFlash(1);sfx.damage();voice(b.enemy,'attack');}
     if(b.g===1)serif(b.win&&rnd()<.3?4:3,b.ally);
     return;
   }
@@ -1101,11 +1165,11 @@ async function pBattle(f,W,Sg){
     let extra='';
     if(a.upper&&rnd()<.08){a.stock++;extra=' ＋ストック';}
     else if(!a.upper&&rnd()<.05){const up={50:66,66:75,75:80,80:90,90:90}[a.keizoku]||a.keizoku;if(up>a.keizoku){a.keizoku=up;extra=` 継続率${up}%にUP`;}}
-    sfx.big();
+    sfx.big();voice(b.ally,'win');
     await announce({title:b.rev?'逆転勝利!!':(b.byStock?'ストック勝利!!':'勝利!!'),sub:`SET ${a.sets} 継続${extra}`,cls:b.rev?'rainbow':'gold',char:b.ally,ms:2000});
     M.battle=null;M.mode='AT';
   }else{
-    b.hpA=0;sfx.lose();
+    b.hpA=0;sfx.lose();voice(b.enemy,'win')||voice(b.ally,'lose');
     await announce({title:'敗北…',sub:'RUSH終了',cls:'dark',char:b.enemy,ms:1800});
     M.battle=null;await endAT(false);
   }
@@ -1127,11 +1191,12 @@ async function endAT(forced){
   const s=M.setting,ew={};ENDINGS.forEach((e,i)=>{if(e.w[s-1])ew[i]=e.w[s-1];});
   const e=ENDINGS[+wpick(ew)];M.cnt.end[e.id]=(M.cnt.end[e.id]||0)+1;
   let tr=null;if(s>=2&&rnd()<.15){const tw={};TROPHY.forEach((t,i)=>{if(s>=t.min)tw[i]=t.w;});tr=TROPHY[+wpick(tw)].n;M.cnt.trophy.push(tr);}
+  voice(e.id==='all'?'kaito':e.id,'end');
   await announce({title:`TOTAL ${got>=0?'+':''}${got}枚`,sub:`${a.sets}SET / ${a.totalG}G${e.id==='all'?'  ―全員集合―':''}`,cls:'ending',
     char:e.id==='all'?['kaito','yuki','ren','shion']:e.id,ms:3200});
   if(tr){sfx.win();await announce({title:`${tr}トロフィー`,sub:'',cls:tr==='虹'?'rainbow':'gold',ms:1800});}
   if(forced){toNormal();return;}
-  M.mode='HIKI';M.hiki={g:5,win:rnd()<.08+.012*(s-1)};
+  M.mode='HIKI';M.hiki={g:5,win:rnd()<hikiRate(s)};
   await announce({title:'反撃ZONE',sub:'5G 引き戻しを狙え!',cls:'dark',char:'yuki',ms:1400});
 }
 async function pHiki(f,W,Sg){
@@ -1139,8 +1204,8 @@ async function pHiki(f,W,Sg){
   if(!h.win&&((Sg&&rnd()<.3)||(W&&rnd()<.08)))h.win=true;
   if(h.g<=0){
     await pushPhase();
-    if(h.win){sfx.big();await announce({title:'引き戻し!!',sub:'RUSH再突入',cls:'rainbow',char:'kaito',ms:1800});await startAT({why:'引き戻し'});}
-    else{sfx.lose();await announce({title:'反撃ZONE 終了',sub:'通常ステージへ',cls:'dark',ms:1400});toNormal();}
+    if(h.win){sfx.big();voice('yuki','win');await announce({title:'引き戻し!!',sub:'RUSH再突入',cls:'rainbow',char:'kaito',ms:1800});await startAT({why:'引き戻し'});}
+    else{sfx.lose();voice('yuki','lose');await announce({title:'反撃ZONE 終了',sub:'通常ステージへ',cls:'dark',ms:1400});toNormal();}
   }
 }
 function toNormal(){Object.assign(M,{mode:'NORMAL',at:null,hiki:null,battle:null,bonus:null,tokka:null,zc:null,cz:null,yuuriG:0,tmode:pickTenjoMode(M.setting),kk:'low',kkG:0,point:0});}
@@ -1230,7 +1295,7 @@ function openMenu(){
   <h3>オプション</h3>
   ${sw('sound','サウンド')}${sw('bgm','BGM')}${sw('assist','目押しサポート（OFFで最大4コマ滑りの実機制御）')}${sw('wait','4.1秒ウェイト')}
   <h3>その他</h3>
-  <div class="grid6"><button class="sbtn" id="bSounds" style="grid-column:span 4">効果音・BGMを登録（他のAIで作った音）</button><button class="sbtn" id="bHelp" style="grid-column:span 2">遊び方・解析</button><button class="sbtn" id="bResetData" style="grid-column:span 2">データクリア</button></div>
+  <div class="grid6"><button class="sbtn" id="bSounds" style="grid-column:span 4">効果音・BGMを登録（他のAIで作った音）</button><button class="sbtn" id="bHelp" style="grid-column:span 2">解析・遊び方</button><button class="sbtn" id="bResetData" style="grid-column:span 2">データクリア</button></div>
   <p style="color:#8a84a0;font-size:11px">オリジナルのパチスロ風シミュレーターです。本物のお金は使いません。</p>`);
 }
 async function copyText(t){
@@ -1249,6 +1314,9 @@ function openChars(){
   ${imgSrc[id]&&imgSrc[id].startsWith('data:')?`<button class="sbtn" data-del="${id}">削除</button>`:''}</div></div>`).join('')}`);
 }
 function openSounds(){
+  const openIds=[...document.querySelectorAll('#mbody details[open]')].map(d=>d.dataset.id);
+  const vrow=v=>{const src=SND.src[v.key];return`<div class="charRow" style="grid-template-columns:1fr auto"><div><b>${v.label}</b> ${src?'<span class="hl">登録済み</span>':''}<br><span class="vline">「${v.line}」</span></div>
+    <div>${src?`<button class="sbtn" data-splay="${v.key}">▶</button> `:''}<button class="sbtn" data-vcopy="${v.key}">コピー</button> <label class="sbtn" style="display:inline-flex;align-items:center;padding:0 10px">登録<input type="file" accept="audio/*" data-sup="${v.key}" hidden></label>${src==='user'?` <button class="sbtn" data-sdel="${v.key}">削除</button>`:''}</div></div>`;};
   const row=x=>{const src=SND.src[x.key],st=src==='user'?'<span class="hl">登録済み</span>':src==='file'?'<span class="hl">ファイル</span>':'<span style="color:#8a84a0">内蔵音</span>';
     return`<div class="charRow" style="grid-template-columns:1fr auto"><div><b>${x.label}</b> ${st}<br><small style="color:#8a84a0">${x.key}.mp3</small></div>
     <div><button class="sbtn" data-splay="${x.key}">▶</button> <button class="sbtn" data-scopy="${x.key}">コピー</button> <label class="sbtn" style="display:inline-flex;align-items:center;padding:0 10px">登録<input type="file" accept="audio/*" data-sup="${x.key}" hidden></label>${src==='user'?` <button class="sbtn" data-sdel="${x.key}">削除</button>`:''}</div></div>`;};
@@ -1258,15 +1326,20 @@ function openSounds(){
   <h3>音量</h3>
   <div class="opt"><span>効果音</span><input type="range" min="0" max="1" step="0.05" value="${S.seVol}" data-vol="seVol"></div>
   <div class="opt"><span>BGM</span><input type="range" min="0" max="1" step="0.05" value="${S.bgmVol}" data-vol="bgmVol"></div>
+  <div class="opt"><span>キャラボイス</span><input type="range" min="0" max="1" step="0.05" value="${S.voiceVol}" data-vol="voiceVol"></div>
   <h3>BGM</h3>${SOUNDS.filter(x=>x.type==='bgm').map(row).join('')}
-  <h3>効果音</h3>${SOUNDS.filter(x=>x.type==='se').map(row).join('')}`);
+  <h3>効果音</h3>${SOUNDS.filter(x=>x.type==='se').map(row).join('')}
+  <h3>キャラボイス</h3>
+  <div class="prompt">キャラごとに、場面ごとのセリフを登録できます。「コピー」でセリフの文章をコピーして、音声AIで読み上げてください。\n・おすすめ → <span class="hl">ElevenLabs</span>（Voice Designでオリジナルの声を作って読み上げ）など\n・登録したセリフだけが鳴ります（未登録なら無音）\n※実在の声優さんの声をまねたクローン音声は使わないでください。</div>
+  ${Object.keys(CHARS).map(id=>{const vs=voiceSlots(id),n=vs.filter(v=>SND.buf[v.key]).length;
+    return`<details data-id="${id}" ${openIds.includes(id)?'open':''}><summary>${CHARS[id].name}（${n}/${vs.length}）</summary>${vs.map(vrow).join('')}</details>`;}).join('')}`);
 }
 let previewNode=null;
 function previewSound(key){
   ac();unlockAudio();
   if(previewNode){try{previewNode.stop();}catch(e){}previewNode=null;}
-  const def=SOUNDS.find(x=>x.key===key),b=SND.buf[key];
-  if(b&&BUS){const n=AC.createBufferSource();n.buffer=b;n.connect(def.type==='bgm'?BUS.bgm:BUS.se);n.start();previewNode=n;if(def.type==='bgm')setTimeout(()=>{if(previewNode===n){try{n.stop();}catch(e){}previewNode=null;}},10000);return;}
+  const def=SOUNDS.find(x=>x.key===key)||{type:'voice'},b=SND.buf[key];
+  if(b&&BUS){const n=AC.createBufferSource();n.buffer=b;n.connect(def.type==='bgm'?BUS.bgm:def.type==='voice'?BUS.voice:BUS.se);n.start();previewNode=n;if(def.type==='bgm')setTimeout(()=>{if(previewNode===n){try{n.stop();}catch(e){}previewNode=null;}},10000);return;}
   const demo={pay:()=>sfx.pay(9),cut_low:()=>sfx.cut(1),cut_high:()=>sfx.cut(3),cut_rainbow:()=>sfx.cut(5),step:()=>sfx.step(2),serif:()=>sfx.serif(3),tick:()=>sfx.tick(20)}[key];
   if(demo)demo();else if(typeof sfx[key]==='function')sfx[key]();else toast('未登録のBGMは内蔵の曲が流れます');
 }
@@ -1276,35 +1349,214 @@ async function uploadSound(key,file){
     const ab=await file.arrayBuffer(),buf=await decodeAudio(ab.slice(0));
     await DB.put(key,ab,'snd');SND.buf[key]=buf;SND.src[key]='user';
     if(BGM.fileKey[BGM.song]===key){BGM.song=undefined;BGM.update();}
-    toast(`${SOUNDS.find(x=>x.key===key).label} を登録しました`);
+    toast(`${soundLabel(key)} を登録しました`);
   }catch(e){toast('この音声ファイルは読み込めませんでした（mp3 / m4a / wav がおすすめ）');}
   openSounds();
 }
-function openHelp(){
-  openModal('遊び方・解析',`
-  <h3>操作</h3>
-  LEVER → STOP×3。PCならスペースキーでレバー、J/K/L（または1/2/3）でストップ、Pでプッシュ。<br>メダルがなくなったら右上の「貸出」（1000円で50枚、架空のお金）。
-  <h3>通常時</h3>
-  ・レア役（チェリー・スイカ・チャンス目）でCZ・AT抽選。高確中は当選率アップ（背景：夜→夕焼け→赤）。<br>
-  ・霊力ポイント（1G+1、弱レア+10、強レア+30）が300たまると周期抽選。<br>
-  ・前兆（冥界ステージ）→ 魔獣バトルで結果告知。<br>
-  ・CZ「霊力解放ZONE」10G：成功でAT。<br>
-  ・天井：モードA 800G / B 600G / C 400G / 天国 150G。<br>
-  ・フリーズ(1/16384)：真・覚醒RUSH＋桜吹雪ラッシュ確定。
-  <h3>AT「REIJIN RUSH」</h3>
-  ・1SET 15G、純増は約3枚/G（押し順ナビに従う）。<br>
-  ・レア役でG数上乗せ・霊力ストック・覚醒BONUS・桜吹雪ラッシュ（上乗せ特化）。<br>
-  ・SET終了で決戦バトル。継続率（50/66/75/80/90%）で継続。ストックがあれば勝利確定。<br>
-  ・真・覚醒RUSH：継続率85%の上位AT。<br>
-  ・覚醒BONUS：25G、ストックと上乗せを抽選。<br>
-  ・AT終了後は反撃ZONE（5G）で引き戻し抽選。<br>
-  ・有利区間は最大4000G。到達すると「有利区間完走」で終了。
-  <h3>設定差（解析）</h3>
-  <table><tr><th>設定</th><th>弱チェリー</th><th>AT継続率の振り分け</th></tr>
-  ${[1,2,3,4,5,6].map(s=>`<tr><td>${s}</td><td class="r">1/${86-2*s}</td><td>${s<=2?'低め':s<=4?'普通':'優遇'}</td></tr>`).join('')}</table>
-  <h3>終了画面キャラ</h3><table>${ENDINGS.map(e=>`<tr><td>${e.id==='all'?'全員集合':CHARS[e.id].short}</td><td>${e.hint}</td></tr>`).join('')}</table>
-  <h3>演出の期待度</h3>青 ＜ 緑 ＜ 赤 ＜ 金 ＜ 虹（確定）。予告カットイン・セリフの文字色・ステップアップ・筐体の枠ランプ・第3停止ボタンの色・PUSHボタンの色が共通です。<br>消灯（ブラックアウト）と役物落下は赤以上。PUSH連打や次回予告のタイトル色もチャンス。リール逆回転はプレミアです。
-  <h3>トロフィー</h3>銅=2以上 / 銀=3以上 / 金=4以上 / キリン柄=5以上 / 虹=6濃厚`);
+/* ================= 解析ページ ================= */
+/* SPEC_SIM: tools/spec_sim.js で出した設定別の値(各設定のゲーム数は SPEC_SIM.games)。抽選値を変えたら再計算して貼り替える */
+const SPEC_SIM={"1":{"at":0.00296,"cz":0.00461,"czWin":0.3601,"rate":98.4,"get":362,"sets":3.62,"over1k":0.06637,"tenjo":0.23375},"2":{"at":0.00308,"cz":0.00469,"czWin":0.37548,"rate":101,"get":378,"sets":3.75,"over1k":0.06813,"tenjo":0.22542},"3":{"at":0.00329,"cz":0.00482,"czWin":0.40913,"rate":103.4,"get":385,"sets":3.8,"over1k":0.07116,"tenjo":0.21602},"4":{"at":0.00349,"cz":0.00487,"czWin":0.42462,"rate":107.2,"get":407,"sets":3.96,"over1k":0.07555,"tenjo":0.21435},"5":{"at":0.00373,"cz":0.00502,"czWin":0.45481,"rate":110.7,"get":424,"sets":4.07,"over1k":0.07901,"tenjo":0.20565},"6":{"at":0.00398,"cz":0.00518,"czWin":0.47322,"rate":115,"get":450,"sets":4.17,"over1k":0.0844,"tenjo":0.20227},"games":2000000,"coin":44.6,"junzou":2.75,"fx":{"1":0.108,"2":0.523,"3":1,"4":1,"5":0}};
+const SETS=[1,2,3,4,5,6];
+const pct=(v,d=1)=>(v*100).toFixed(d)+'%';
+const inv=(p,d=1)=>p>0?'1/'+(1/p).toFixed(d):'-';
+const norm=o=>{let t=0;for(const k in o)t+=o[k];const r={};for(const k in o)r[k]=o[k]/t;return r;};
+const trow=(head,cells)=>`<tr><th>${head}</th>${cells.map(c=>`<td class="r">${c}</td>`).join('')}</tr>`;
+const setHead=(first='')=>`<tr><th>${first}</th>${SETS.map(s=>`<th class="r">設定${s}</th>`).join('')}</tr>`;
+const ROLE_NAME={BELL:'押し順ベル',REP:'リプレイ',CHE_W:'弱チェリー',CHE_S:'強チェリー',SUI_W:'弱スイカ',SUI_S:'強スイカ',CHANCE:'チャンス目',FREEZE:'フリーズ',HAZURE:'ハズレ'};
+const RARES=['CHE_W','SUI_W','CHE_S','SUI_S','CHANCE'];
+const ANA={
+  spec(){
+    const sim=SPEC_SIM,v=(s,k,f)=>sim?f(sim[s][k]):'-';
+    const ft=SETS.map(flagTable);
+    const hz=ft.map(t=>1-Object.values(t).reduce((a,b)=>a+b,0));
+    return`
+    <h3>機種概要</h3>
+    <table>
+      <tr><th>タイプ</th><td>AT機（スマスロ・メダルレス）</td></tr>
+      <tr><th>AT純増</th><td>約${sim?sim.junzou.toFixed(1):'-'}枚/G（押し順ナビ）</td></tr>
+      <tr><th>コイン持ち</th><td>約${sim?sim.coin.toFixed(0):'-'}G / 50枚</td></tr>
+      <tr><th>天井</th><td>通常時 最大${TENJO.A}G ＋前兆 → AT確定</td></tr>
+      <tr><th>有利区間</th><td>最大4000G</td></tr>
+      <tr><th>AT性能</th><td>1SET ${15}G ＋決戦バトル（継続率 ${KEIZOKU[0]}〜${KEIZOKU[KEIZOKU.length-1]}%）</td></tr>
+      <tr><th>1G当たり</th><td>3枚掛け</td></tr>
+    </table>
+    <h3>設定別 初当たり・機械割</h3>
+    <table>${setHead()}
+      ${trow('AT初当たり',SETS.map(s=>v(s,'at',x=>inv(x,0))))}
+      ${trow('CZ確率',SETS.map(s=>v(s,'cz',x=>inv(x,0))))}
+      ${trow('CZ成功率',SETS.map(s=>v(s,'czWin',x=>pct(x,0))))}
+      ${trow('機械割',SETS.map(s=>v(s,'rate',x=>x.toFixed(1)+'%')))}
+    </table>
+    <h3>設定別 AT性能</h3>
+    <table>${setHead()}
+      ${trow('平均獲得',SETS.map(s=>v(s,'get',x=>Math.round(x)+'枚')))}
+      ${trow('平均SET数',SETS.map(s=>v(s,'sets',x=>x.toFixed(2))))}
+      ${trow('1000枚超',SETS.map(s=>v(s,'over1k',x=>pct(x,1))))}
+      ${trow('天井到達',SETS.map(s=>v(s,'tenjo',x=>pct(x,1))))}
+    </table>
+    <h3>小役確率</h3>
+    <table>${setHead('小役')}
+      ${Object.keys(ft[0]).map(k=>trow(ROLE_NAME[k],ft.map(t=>inv(t[k],k==='BELL'||k==='REP'?2:1)))).join('')}
+      ${trow('ハズレ',hz.map(x=>inv(x,2)))}
+    </table>
+    <p class="note">初当たり・CZ・機械割・AT性能は、各設定${sim?Math.round(sim.games/10000)+'万':'-'}ゲームのシミュレーション値です（押し順ナビどおり・目押しサポートONで消化）。初当たりとCZ確率は通常時のゲーム数で割っています。</p>`;
+  },
+  flow(){
+    const czAvg=SPEC_SIM?pct(SETS.reduce((a,s)=>a+SPEC_SIM[s].czWin,0)/6,0):'約40%';
+    return`
+    <div class="flow">
+      <div class="fn n">通常時<small>低確 / 高確 / 超高確</small></div>
+      <div class="fb"><span>レア役 → CZ・AT直撃抽選</span><span>霊力300pt → 周期抽選</span><span>天井 ${TENJO.H}〜${TENJO.A}G</span></div>
+      <div class="fa">▼</div>
+      <div class="fn z">前兆（冥界ステージ）<small>5〜13G ・ 最後に魔獣バトルで告知</small></div>
+      <div class="fsplit">
+        <div><div class="fa">▼ CZ当選</div><div class="fn c">霊力解放ZONE<small>10G ・ 成功率 ${czAvg}</small></div><div class="fa">▼ 成功</div></div>
+        <div><div class="fa">▼ AT直撃</div></div>
+        <div><div class="fa">▼ ガセ・失敗</div><div class="fn g">通常時へ</div></div>
+      </div>
+      <div class="fn a">REIJIN RUSH<small>1SET 15G ・ 純増 約${SPEC_SIM?SPEC_SIM.junzou.toFixed(1):'3'}枚/G</small></div>
+      <div class="fb"><span>レア役 → G数上乗せ</span><span>霊力ストック</span><span>覚醒BONUS 25G</span><span>桜吹雪ラッシュ 10G</span></div>
+      <div class="fa">▼ SET消化</div>
+      <div class="fn b">決戦バトル 5G<small>継続率 ${KEIZOKU[0]}〜${KEIZOKU[KEIZOKU.length-1]}% ・ ストックがあれば勝利確定</small></div>
+      <div class="fsplit two"><div><div class="fa up">勝利 ▲ 次のSETへ</div></div><div><div class="fa">▼ 敗北</div></div></div>
+      <div class="fn h">反撃ZONE 5G<small>引き戻し ${pct(hikiRate(1),0)}〜${pct(hikiRate(6),0)}</small></div>
+      <div class="fa">▼</div>
+      <div class="fn g">通常時へ（モード再抽選）</div>
+      <div class="fnote">
+        <b>フリーズ</b>（${inv(flagTable(1).FREEZE,0)}）→ 真・覚醒RUSH ＋ 桜吹雪ラッシュ<br>
+        <b>真・覚醒RUSH</b>：継続率85%の上位AT。フリーズ、またはBONUS開始時2%で昇格<br>
+        <b>有利区間</b>：4000Gに達すると「有利区間完走」で終了
+      </div>
+    </div>`;
+  },
+  normal(){
+    const tw=SETS.map(s=>norm(tenjoWeights(s)));
+    const MN={A:'A',B:'B',C:'C',H:'天国'};
+    return`
+    <h3>内部状態</h3>
+    <table>
+      <tr><th>低確</th><td>基本の状態。背景は夜の街</td></tr>
+      <tr><th>高確</th><td>弱レア役の30%、強レア役の45%で移行（10〜34G）。背景は夕焼け</td></tr>
+      <tr><th>超高確</th><td>強レア役の25%で移行（20〜39G）。背景は赤い月</td></tr>
+    </table>
+    <h3>レア役別 CZ当選率</h3>
+    <table><tr><th>役</th><th class="r">低確</th><th class="r">高確</th><th class="r">超高確</th><th class="r">AT直撃</th></tr>
+      ${RARES.map(k=>`<tr><th>${ROLE_NAME[k]}</th>${CZ_RATE[k].map(x=>`<td class="r">${pct(x)}</td>`).join('')}<td class="r">${pct(DIRECT_AT[k])}</td></tr>`).join('')}
+    </table>
+    <p class="note">設定1の値。設定が1上がるごとに当選率は×1.03（設定6は×1.15）。</p>
+    <h3>霊力ポイントと周期抽選</h3>
+    <table>
+      <tr><th>加算</th><td>毎ゲーム+1 / 弱レア役+10 / 強レア役+30</td></tr>
+      <tr><th>周期</th><td>300ptで抽選（ポイントはリセット）</td></tr>
+    </table>
+    <table><tr><th>モード</th><th class="r">天井</th><th class="r">周期AT当選</th></tr>
+      ${Object.keys(TENJO).map(m=>`<tr><th>${MN[m]}</th><td class="r">${TENJO[m]}G</td><td class="r">${pct(PERIOD_AT[m])}</td></tr>`).join('')}
+    </table>
+    <p class="note">周期で外れた場合、CZ当選${pct(.22,0)}（設定ごとに+1%）、残りの一部はガセ前兆。周期AT当選は設定ごとに+0.4%。</p>
+    <h3>モード振り分け（AT終了後）</h3>
+    <table>${setHead('モード')}${Object.keys(TENJO).map(m=>trow(MN[m],tw.map(w=>pct(w[m],0)))).join('')}</table>
+    <h3>前兆</h3>
+    <table>
+      <tr><th>期間</th><td>5〜13G（天井は4G）</td></tr>
+      <tr><th>昇格</th><td>前兆中のレア役で CZ→AT（強25% / 弱5%）、ガセ→CZ（強50% / 弱15%）</td></tr>
+    </table>
+    <h3>霊力解放ZONE（CZ）</h3>
+    <table><tr><th>役</th><th class="r">1Gあたりの成功抽選</th></tr>
+      ${Object.keys(CZ_WIN).map(k=>`<tr><th>${ROLE_NAME[k]}</th><td class="r">${pct(CZ_WIN[k])}</td></tr>`).join('')}
+    </table>
+    <p class="note">10G継続。設定ごとに+0.4%。強レア役で成功したときは即告知、それ以外は最終ゲームで告知。</p>`;
+  },
+  at(){
+    const kw=SETS.map(s=>norm(keizokuWeights(s)));
+    const expSets=w=>KEIZOKU.reduce((a,k)=>a+w[k]/(1-k/100),0);
+    const ew=norm(ENEMY_W.win),el=norm(ENEMY_W.lose);
+    return`
+    <h3>継続率の振り分け</h3>
+    <table>${setHead('継続率')}
+      ${KEIZOKU.map(k=>trow(k+'%',kw.map(w=>pct(w[k],1)))).join('')}
+      ${trow('平均SET数',kw.map(w=>expSets(w).toFixed(2)))}
+    </table>
+    <p class="note">平均SET数はストック・継続率UP・引き戻しを含まない理論値。勝利時5%で継続率が1段階UP（通常RUSH）。</p>
+    <h3>AT中のレア役</h3>
+    <table><tr><th>役</th><th>恩恵</th><th class="r">BONUS</th></tr>
+      <tr><th>弱チェ・弱スイカ</th><td>35%で5/10/20G上乗せ</td><td class="r">2%</td></tr>
+      <tr><th>強チェリー</th><td>15%で桜吹雪ラッシュ、それ以外は10〜50G上乗せ</td><td class="r">15%</td></tr>
+      <tr><th>強スイカ</th><td>10〜50G上乗せ</td><td class="r">10%</td></tr>
+      <tr><th>チャンス目</th><td>25%でストック、それ以外は5〜20G上乗せ</td><td class="r">8%</td></tr>
+      <tr><th>ハズレ</th><td>-</td><td class="r">0.2%</td></tr>
+      <tr><th>リプレイ</th><td>1/300で10/20G上乗せ</td><td class="r">-</td></tr>
+    </table>
+    <h3>覚醒BONUS</h3>
+    <table>
+      <tr><th>期間</th><td>25G（赤7揃いで開始）</td></tr>
+      <tr><th>ストック</th><td>強レア30% / 弱レア8% / ベル0.5%</td></tr>
+      <tr><th>上乗せ</th><td>ストックに外れたレア役で10/20/30G</td></tr>
+      <tr><th>昇格</th><td>開始時2%で真・覚醒RUSHへ</td></tr>
+    </table>
+    <h3>桜吹雪ラッシュ（上乗せ特化）</h3>
+    <table>
+      <tr><th>期間</th><td>10G</td></tr>
+      <tr><th>上乗せ</th><td>ベル3〜10G / リプ3〜5G / 弱レア10〜30G / 強レア20〜100G ＋毎ゲーム1/25で+100G</td></tr>
+      <tr><th>平均</th><td>約90G</td></tr>
+    </table>
+    <h3>決戦バトル 敵キャラ別の勝率</h3>
+    <table><tr><th>継続率</th>${Object.keys(ew).map(e=>`<th class="r">${CHARS[e].short}</th>`).join('')}</tr>
+      ${KEIZOKU.map(k=>{const p=k/100;return`<tr><th>${k}%</th>${Object.keys(ew).map(e=>`<td class="r">${pct(p*ew[e]/(p*ew[e]+(1-p)*el[e]),0)}</td>`).join('')}</tr>`;}).join('')}
+    </table>
+    <p class="note">ストックがある場合は敵に関係なく勝利確定。敗北予定でもバトル中の強レア役50%、弱レア役15%で逆転。</p>
+    <h3>真・覚醒RUSH / 反撃ZONE</h3>
+    <table>
+      <tr><th>真・覚醒RUSH</th><td>継続率85%。勝利時8%でストック獲得</td></tr>
+      <tr><th>反撃ZONE</th><td>5G。引き戻し率 ${SETS.map(s=>`設定${s} ${pct(hikiRate(s),1)}`).join(' / ')}。強レア30%・弱レア8%で追加当選</td></tr>
+    </table>`;
+  },
+  hint(){
+    const ends=ENDINGS.map(e=>{const w=SETS.map(s=>{const tot=ENDINGS.reduce((a,x)=>a+x.w[s-1],0);return e.w[s-1]/tot;});return trow(`${e.id==='all'?'全員集合':CHARS[e.id].short}<br><small>${e.hint}</small>`,w.map(x=>x?pct(x,1):'-'));}).join('');
+    const fx=SPEC_SIM&&SPEC_SIM.fx;
+    const COL=['','青','緑','赤','金','虹'];
+    return`
+    <h3>演出の期待度（色）</h3>
+    <table><tr><th>色</th><th class="r">通常時のレア役期待度</th></tr>
+      ${[1,2,3,4,5].map(l=>`<tr><th><span class="cc c${l}">${COL[l]}</span></th><td class="r">${l===5?'当たり確定':fx&&fx[l]!=null?pct(fx[l],0):'-'}</td></tr>`).join('')}
+    </table>
+    <p class="note">予告カットイン・セリフの文字色・ステップアップ・枠ランプ・第3停止ボタン・PUSHボタンで共通。</p>
+    <h3>演出一覧</h3>
+    <table>
+      <tr><th>消灯・役物落下</th><td>赤以上で出現</td></tr>
+      <tr><th>リールフラッシュ</th><td>白＝弱レア役 / 金＝強レア役 / 虹＝7揃い・プレミア目（確定）</td></tr>
+      <tr><th>PUSHボタン</th><td>白銀＝通常 / 赤・金＝チャンス / 虹＝AT確定</td></tr>
+      <tr><th>PUSH連打</th><td>当たりのとき出やすい（当たり45% / ハズレ12%）</td></tr>
+      <tr><th>次回予告</th><td>タイトルの色が赤・金ならチャンス</td></tr>
+      <tr><th>リール逆回転</th><td>フリーズ（プレミア）</td></tr>
+      <tr><th>背景</th><td>夜＝低確 / 夕焼け＝高確 / 赤い月＝超高確</td></tr>
+    </table>
+    <h3>終了画面キャラの出現率</h3>
+    <table>${setHead('キャラ')}${ends}</table>
+    <h3>トロフィー（AT終了時 15%）</h3>
+    <table>${TROPHY.map(t=>`<tr><th>${t.n}</th><td>設定${t.min}以上${t.min===6?'濃厚':'確定'}</td></tr>`).join('')}</table>
+    <h3>立ち回りの目安</h3>
+    <table>
+      <tr><th>天井狙い</th><td>モードAでも${TENJO.A}Gで天井。ハマリ400G以上なら天井までの距離が短くなります</td></tr>
+      <tr><th>ヤメ時</th><td>AT終了後の反撃ZONE（5G）を消化して、前兆がなければヤメ</td></tr>
+      <tr><th>設定推測</th><td>弱チェリー確率・CZ成功率・終了画面・トロフィー</td></tr>
+    </table>`;
+  },
+  play(){
+    return`
+    <h3>操作</h3>
+    LEVER → STOP×3。PCならスペースキーでレバー、J/K/L（または1/2/3）でストップ、Pでプッシュ。<br>メダルがなくなったら右上の「貸出」（1000円で50枚、架空のお金）。
+    <h3>ゲームの流れ</h3>
+    通常時にレア役や周期でCZ・ATを抽選 → 前兆で告知 → CZ成功かAT直撃でREIJIN RUSHへ。<br>
+    RUSH中は押し順ナビに従ってメダルを増やし、SET終了ごとの決戦バトルに勝てば継続します。<br>
+    詳しい数値は「スペック」「通常時」「AT」タブを見てください。`;
+  },
+};
+let anaTab='spec';
+function openAnalysis(tab){
+  if(tab)anaTab=tab;
+  const tabs=[['spec','スペック'],['flow','フロー'],['normal','通常時'],['at','AT'],['hint','演出・示唆'],['play','遊び方']];
+  openModal('解析',`<div class="tabs">${tabs.map(([k,n])=>`<button class="tab ${k===anaTab?'on':''}" data-ana="${k}">${n}</button>`).join('')}</div><div class="ana">${ANA[anaTab]()}</div>`);
+  $('#mbody').scrollTop=0;
 }
 $('#mbody').addEventListener('click',async e=>{
   const t=e.target;
@@ -1315,7 +1567,9 @@ $('#mbody').addEventListener('click',async e=>{
   else if(t.dataset.sdel){const k=t.dataset.sdel;await DB.del(k,'snd');delete SND.buf[k];delete SND.src[k];if(BGM.fileKey[BGM.song]===k){BGM.song=undefined;BGM.update();}openSounds();}
   else if(t.dataset.set!=null){if(busy)return toast('ゲーム中は変更できません');const s=+t.dataset.set||1+rint(6);if(+t.dataset.set===0){S.showSet=false;jsave(SSAVE,S);}
     M.setting=s;toNormal();M.hamari=0;save();render();toast(+t.dataset.set?`設定${s}に変更しました`:'ランダム設定にしました（非公開）');openMenu();}
-  else if(t.id==='bHelp')openHelp();
+  else if(t.id==='bHelp')openAnalysis();
+  else if(t.dataset.ana)openAnalysis(t.dataset.ana);
+  else if(t.dataset.vcopy){const v=VOICES.find(y=>y.key===t.dataset.vcopy);if(await copyText(v.line)){t.textContent='✓済';toast('セリフをコピーしました');}else toast(`コピーできませんでした: ${v.line}`);}
   else if(t.id==='bResetData'){if(busy)return;if(confirm('データカウンターとメダルをリセットしますか？')){const s=M.setting;M=newState(s);save();render();closeModal();}}
   else if(t.dataset.copy){const id=t.dataset.copy;
     if(await copyText(prompt(id))){t.textContent='✓済';toast(`${CHARS[id].name} のプロンプトをコピーしました`);}
