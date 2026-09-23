@@ -236,6 +236,65 @@ body.freezeBody .reel{filter:brightness(.2)}
 .hist{font-size:12px}
 .hist div{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--line)}
 .tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:10px;margin-right:4px;background:#333}
+/* ===== バトルシーン ===== */
+#btl{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;pointer-events:none}
+#btl.on{display:flex}
+#btl .bTop{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 0;font-size:10px;font-weight:900;text-shadow:0 1px 3px #000}
+#btl .bName{padding:1px 6px;border-radius:3px;background:#000a;border-bottom:2px solid}
+#btl .bName.a{border-color:#ffb31a}#btl .bName.e{border-color:#ff2d55}
+#btl .bVS{font-size:11px;color:#ffd28a;letter-spacing:1px}
+#btl .bBars{display:flex;gap:8px;padding:2px 6px}
+#btl .bar{flex:1;height:7px;background:#000b;border:1px solid #ffffff66;border-radius:4px;overflow:hidden;box-shadow:0 0 6px #0008}
+#btl .bar i{display:block;height:100%;transition:width .45s cubic-bezier(.2,.8,.3,1)}
+#btl .bar.a i{background:linear-gradient(90deg,#ffd23a,#ff7a1a)}
+#btl .bar.e i{background:linear-gradient(90deg,#ff2d55,#8a0020);margin-left:auto}
+#btl .bar.low i{animation:blink .4s steps(2) infinite}
+#btl .bStage{position:relative;flex:1;overflow:hidden}
+#btl .bs{position:absolute;bottom:0;height:88%;display:flex;align-items:flex-end;transition:transform .18s ease-out,filter .18s,opacity .5s}
+#btl .bs img{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 4px 10px #000a)}
+#btl .bs .ph{height:100%}
+#btl .bs.ally{left:1%;width:50%;justify-content:flex-start}
+#btl .bs.enemy{right:1%;width:50%;justify-content:flex-end;transform:scaleX(-1)}
+#btl .bs.enemy .ph{transform:scaleX(-1)}
+#lcd.btl #lcdTop,#lcd.btl #lcdMain,#lcd.btl .ch{display:none}
+#btl .bs.ally.dash{transform:translateX(26%) scale(1.06)}
+#btl .bs.enemy.dash{transform:scaleX(-1) translateX(26%) scale(1.06)}
+#btl .bs.hit{filter:brightness(2.4) saturate(.3);animation:hitShake .22s 2}
+@keyframes hitShake{25%{margin-left:6px}75%{margin-left:-6px}}
+#btl .bs.down{opacity:0;transform:translateY(30%) rotate(14deg) scale(.9);transition:all .7s ease-in}
+#btl .bs.enemy.down{transform:scaleX(-1) translateY(30%) rotate(14deg) scale(.9)}
+#btl .bs.pose{transform:scale(1.12) translateY(-4%)}
+#btl .bs.enemy.pose{transform:scaleX(-1) scale(1.12) translateY(-4%)}
+#btl .bfx{position:absolute;inset:0;overflow:hidden}
+.slash{position:absolute;left:-10%;top:50%;width:120%;height:6px;margin-top:-3px;transform-origin:left center;
+  background:linear-gradient(90deg,transparent,#fff 20%,#fff 70%,transparent);filter:drop-shadow(0 0 8px #fff);animation:slashGo .28s ease-out both}
+.slash.c2{background:linear-gradient(90deg,transparent,#7dffab 20%,#fff 70%,transparent)}
+.slash.c3{background:linear-gradient(90deg,transparent,#ff5a6b 20%,#fff 70%,transparent);height:9px}
+.slash.c4{background:linear-gradient(90deg,transparent,#ffd84a 20%,#fff 70%,transparent);height:12px}
+@keyframes slashGo{0%{transform:rotate(var(--rot)) scaleX(0);opacity:0}25%{opacity:1}100%{transform:rotate(var(--rot)) scaleX(1);opacity:0}}
+.beam{position:absolute;top:38%;height:22%;left:0;right:0;background:linear-gradient(90deg,#fff0,#ffd28a,#fff,#ffd28a,#fff0);filter:blur(2px) drop-shadow(0 0 16px #ffb347);animation:beamGo .5s ease-out both}
+.beam.rev{animation-name:beamRev}
+@keyframes beamGo{0%{clip-path:inset(0 100% 0 0);opacity:.2}40%{opacity:1}100%{clip-path:inset(0 0 0 0);opacity:0}}
+@keyframes beamRev{0%{clip-path:inset(0 0 0 100%);opacity:.2}40%{opacity:1}100%{clip-path:inset(0 0 0 0);opacity:0}}
+.bwhite{position:absolute;inset:0;background:#fff;animation:bw .45s ease-out both}
+@keyframes bw{0%{opacity:.95}100%{opacity:0}}
+.spark{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff6c8;box-shadow:0 0 8px #ffd84a;animation:sparkGo .5s ease-out both}
+@keyframes sparkGo{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+#btl .bBanner{position:absolute;left:0;right:0;top:34%;text-align:center;font-weight:900;font-size:clamp(16px,5.5vw,26px);
+  color:#fff;text-shadow:0 0 10px #000,0 2px 0 #000;transform:skewX(-8deg);opacity:0}
+#btl .bBanner.show{animation:bannerGo 1s ease-out both}
+#btl .bBanner.c3{color:#ff6b78}#btl .bBanner.c4{color:#ffd84a}
+#btl .bBanner.c5{background:linear-gradient(90deg,#ff3b3b,#fffa6b,#3bff8a,#3bd4ff,#ff3bd0);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes bannerGo{0%{opacity:0;transform:skewX(-8deg) translateX(-30%) scale(.8)}20%{opacity:1;transform:skewX(-8deg) translateX(0) scale(1)}80%{opacity:1}100%{opacity:0;transform:skewX(-8deg) scale(1.1)}}
+#btl .bDmg{position:absolute;inset:0}
+.dmgNum{position:absolute;font-weight:900;font-size:22px;color:#fff;text-shadow:0 0 8px #ff2d3d,0 2px 0 #000;animation:dmgGo .9s ease-out both}
+.dmgNum.a{color:#ffd23a;text-shadow:0 0 8px #ff7a1a,0 2px 0 #000}
+@keyframes dmgGo{0%{transform:translateY(0) scale(.6);opacity:0}25%{transform:translateY(-14px) scale(1.25);opacity:1}100%{transform:translateY(-40px) scale(1);opacity:0}}
+#btl.pinch::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 40px #ff0020;animation:blink .7s steps(2) infinite}
+#btl .bTurn{position:absolute;right:6px;bottom:4px;font-size:10px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;background:#0008;padding:1px 6px;border-radius:3px}
+.clashFx{position:absolute;left:50%;top:45%;width:40%;aspect-ratio:1;margin-left:-20%;border-radius:50%;
+  background:radial-gradient(circle,#fff,#ffd84a 40%,transparent 70%);animation:clashPulse .4s ease-out infinite alternate}
+@keyframes clashPulse{from{transform:scale(.7);opacity:.5}to{transform:scale(1.15);opacity:1}}
 /* ---- 演出 ---- */
 #lcdWrap{transition:box-shadow .3s}
 #lcdWrap.lamp1{box-shadow:0 0 22px #1a6bff,0 0 6px #1a6bff}
@@ -324,6 +383,7 @@ body.freezeBody .reel{filter:brightness(.2)}
     <div id="lcdMain"><div id="lcdTitle"></div><div id="lcdSub"></div></div>
     <div id="gauge"><i></i></div>
     <div id="hp"><div class="hpa"><i></i></div><div class="hpe"><i></i></div></div>
+    <div id="btl"></div>
     <div id="serif"></div>
     <div id="step"></div>
     <div id="cut"></div>
@@ -965,6 +1025,87 @@ const LINES={1:['霊力反応…?','ん…?','何か感じる…'],2:['霊力が
 function cutin(l,id,text){const el=$('#cut');el.className='';void el.offsetWidth;el.className='show lv'+l;
   el.innerHTML=`<div class="cc">${charHTML(id)}</div><div class="ct">${text}</div>`;sfx.cut(l);voice(id,'cut');clearTimeout(cutT);cutT=setTimeout(()=>el.className='',1300);}
 function lcdFlash(l){const lcd=$('#lcd');lcd.classList.remove('fx1','fx2','fx3','fx4','fx5');lcd.classList.add('fx'+l);clearTimeout(fxT);fxT=setTimeout(()=>lcd.classList.remove('fx'+l),900);}
+/* ================= バトルシーン ================= */
+const BTL={
+  cur:null,
+  start(o){
+    const el=$('#btl');this.cur=o;
+    el.className='on';$('#lcd').classList.add('btl');
+    el.innerHTML=`
+      <div class="bTop"><span class="bName a">${CHARS[o.ally].short}</span><span class="bVS">${o.title||'決戦バトル'}</span><span class="bName e">${CHARS[o.enemy].short}</span></div>
+      <div class="bBars"><div class="bar a"><i style="width:${o.hpA}%"></i></div><div class="bar e"><i style="width:${o.hpE}%"></i></div></div>
+      <div class="bStage">
+        <div class="bs ally">${charHTML(o.ally)}</div>
+        <div class="bs enemy">${charHTML(o.enemy)}</div>
+        <div class="bfx"></div><div class="bDmg"></div>
+        <div class="bBanner"></div><div class="bTurn"></div>
+      </div>`;
+  },
+  end(){const el=$('#btl');if(el.className)el.className='';$('#lcd').classList.remove('btl');this.cur=null;},
+  hp(a,e,turn){
+    const el=$('#btl');if(!el.classList.contains('on'))return;
+    const ba=el.querySelector('.bar.a'),be=el.querySelector('.bar.e');
+    if(ba){ba.firstElementChild.style.width=a+'%';ba.classList.toggle('low',a<=34);}
+    if(be){be.firstElementChild.style.width=e+'%';be.classList.toggle('low',e<=34);}
+    el.classList.toggle('pinch',a<=34);
+    const t=el.querySelector('.bTurn');if(t&&turn!=null)t.textContent='残り '+turn+'G';
+  },
+  fx(html,ms=700){const f=$('#btl .bfx');if(!f)return;const d=document.createElement('div');d.innerHTML=html;const n=d.firstElementChild;f.appendChild(n);setTimeout(()=>n.remove(),ms);},
+  sparks(x,y,n=10){for(let i=0;i<n;i++){const a=rnd()*6.28,d=20+rnd()*40;
+    this.fx(`<div class="spark" style="left:${x}%;top:${y}%;--dx:${(Math.cos(a)*d).toFixed(0)}px;--dy:${(Math.sin(a)*d).toFixed(0)}px"></div>`,600);}},
+  banner(text,lv){const b=$('#btl .bBanner');if(!b)return;b.className='bBanner';void b.offsetWidth;b.textContent=text;b.className='bBanner show'+(lv>=3?' c'+Math.min(5,lv):'');},
+  /* 攻撃1回ぶんの流れ: 構え → 踏み込み → 斬撃 → 着弾 → ダメージ */
+  async attack(side,name,dmg,lv=2,beam){
+    const el=$('#btl');if(!el.classList.contains('on'))return;
+    const atk=el.querySelector(side==='a'?'.bs.ally':'.bs.enemy'),def=el.querySelector(side==='a'?'.bs.enemy':'.bs.ally');
+    this.banner(name,lv);
+    atk.classList.add('dash');
+    await sleep(auto?70:200);
+    if(beam)this.fx(`<div class="beam${side==='e'?' rev':''}"></div>`,600);
+    else for(let i=0;i<(lv>=3?3:1);i++)this.fx(`<div class="slash c${Math.min(4,lv)}" style="--rot:${side==='a'?-18+i*16:18-i*16}deg"></div>`,400);
+    side==='a'?sfx.hit():sfx.damage();
+    await sleep(auto?60:150);
+    this.fx('<div class="bwhite"></div>',450);shake();vib(lv>=3?60:30);
+    def.classList.add('hit');this.sparks(side==='a'?74:26,52,lv>=3?16:10);
+    const dn=document.createElement('div');dn.className='dmgNum'+(side==='a'?'':' a');dn.textContent='-'+dmg;
+    dn.style.left=(side==='a'?68:22)+'%';dn.style.top='40%';$('#btl .bDmg').appendChild(dn);setTimeout(()=>dn.remove(),900);
+    await sleep(auto?90:260);
+    atk.classList.remove('dash');def.classList.remove('hit');
+  },
+  /* 鍔迫り合い */
+  async clash(ms=1400){
+    const el=$('#btl');if(!el.classList.contains('on'))return;
+    this.banner('鍔迫り合い!!',3);
+    el.querySelector('.bs.ally').classList.add('dash');el.querySelector('.bs.enemy').classList.add('dash');
+    const c=document.createElement('div');c.className='clashFx';$('#btl .bfx').appendChild(c);
+    const t=auto?ms*.4:ms;
+    for(let i=0;i<t/220;i++){this.sparks(50,48,6);sfx.t(1800+rint(600),.05,'square',.04);shake();await sleep(220);}
+    c.remove();el.querySelector('.bs.ally').classList.remove('dash');el.querySelector('.bs.enemy').classList.remove('dash');
+  },
+  /* 決着 */
+  async finish(win){
+    const el=$('#btl');if(!el.classList.contains('on'))return;
+    const ally=el.querySelector('.bs.ally'),enemy=el.querySelector('.bs.enemy');
+    if(win){
+      this.banner(ATK[this.cur.ally]?`${ATK[this.cur.ally]}!!`:'渾身の一撃!!',4);
+      ally.classList.add('dash');sfx.hit();vib([60,40,120]);
+      this.fx('<div class="beam"></div>',700);await sleep(auto?150:400);
+      this.fx('<div class="bwhite"></div>',500);shake();this.sparks(74,50,22);
+      enemy.classList.add('hit');this.hp(this.cur.hpA,0);
+      await sleep(auto?150:400);enemy.classList.add('down');ally.classList.remove('dash');ally.classList.add('pose');
+      sfx.win();await sleep(auto?250:700);
+    }else{
+      this.banner(`${ENEMY_ATK[this.cur.enemy]||'反撃'}!!`,3);
+      enemy.classList.add('dash');sfx.damage();
+      this.fx('<div class="beam rev"></div>',700);await sleep(auto?150:400);
+      this.fx('<div class="bwhite"></div>',500);shake();this.sparks(26,50,18);
+      ally.classList.add('hit');this.hp(0,this.cur.hpE);
+      await sleep(auto?150:400);ally.classList.add('down');enemy.classList.remove('dash');enemy.classList.add('pose');
+      sfx.lose();await sleep(auto?250:700);
+    }
+  },
+};
+
 /* 期待度: 0=なし 1=青 2=緑 3=赤 4=金 5=虹(確定) */
 function calcHeat(g){
   const f=g.flag;let h=0,sure=false;
@@ -1174,14 +1315,20 @@ async function pZencho(f,W,Sg){
     z.enemy=z.result==='AT'?wpick({jaguard:2,nox:3,amane:3}):wpick({jaguard:5,nox:2,amane:1});
     const col=z.result==='AT'?wpick({gold:3,red:5,blue:2}):z.result==='CZ'?wpick({red:3,blue:7}):wpick({red:1,blue:6,dark:3});
     voice(z.enemy,'appear');await announce({title:pick(['「決戦の刻」','「守るべきもの」','「黒き月」','「霊力の果て」','「反撃の狼煙」']),sub:'次回予告',cls:col,char:z.enemy,ms:1800});
-    lcdFlash(good?3:2);lcdMsg('魔獣 出現!!','VS 大魔獣');
+    lcdFlash(good?3:2);z.hpA=100;z.hpE=100;
+    BTL.start({ally:'kaito',enemy:z.enemy,hpA:100,hpE:100,title:'VS 大魔獣'});BTL.hp(100,100,z.g);
   }else if(z.g>0&&z.g<3){
-    shake();
-    if(good&&rnd()<.35){lcdFlash(4);lcdMsg('チャンスアップ!!',pick(['背景が赤く染まる…','霊力が共鳴している!']));}
-    else lcdMsg(pick(['カイトの攻撃!','魔獣の反撃!','激しい鍔迫り合い!']),'');
+    const mine=rnd()<(good?.65:.4),dmg=18+rint(22),lv=mine?(good&&rnd()<.4?4:3):2;
+    if(mine)z.hpE=Math.max(10,(z.hpE||100)-dmg);else z.hpA=Math.max(10,(z.hpA||100)-dmg);
+    if(!BTL.cur)BTL.start({ally:'kaito',enemy:z.enemy,hpA:z.hpA||100,hpE:z.hpE||100,title:'VS 大魔獣'});
+    await BTL.attack(mine?'a':'e',mine?`${ATK.kaito}!!`:'魔獣の猛攻!!',dmg,lv,false);
+    BTL.hp(z.hpA||100,z.hpE||100,z.g);
+    if(good&&rnd()<.35){lcdFlash(4);BTL.banner('チャンスアップ!!',4);}
   }
   if(z.g<=0){
     await pushPhase('PUSH!!',pushStyle(good,z.result==='AT'));
+    if(z.result!=='NONE')await BTL.finish(true);else await BTL.finish(false);
+    BTL.end();
     if(z.result==='AT'){sfx.win();voice('kaito','win');await announce({title:'撃破!!',sub:'AT確定',cls:'gold',char:'kaito',ms:1600});await startAT({why:z.why});}
     else if(z.result==='CZ'){sfx.win();voice('kaito','win');await announce({title:'撃破!!',sub:'霊力解放ZONEへ',cls:'blue',char:'kaito',ms:1400});await startCZ();}
     else{sfx.lose();voice('kaito','lose');await announce({title:'撤退…',sub:'通常ステージへ',cls:'dark',ms:1400});M.mode='NORMAL';M.zc=null;}
@@ -1268,18 +1415,23 @@ async function startBattle(){
   const ally=a.upper?wpick({kaito:6,shion:2,toya:2,gou:2}):wpick({kaito:5,yuki:2,ren:2,shion:2,toya:2,gou:2});
   M.battle={g:5,win,byStock,enemy,ally,hpA:100,hpE:100};M.mode='BATTLE';voice(enemy,'appear');
   await announce({title:`VS ${CHARS[enemy].name}`,sub:`決戦バトル  継続率${a.keizoku}%`,cls:'red',char:[ally,enemy],ms:1800});
+  BTL.start({ally,enemy,hpA:100,hpE:100,title:`決戦 継続率${a.keizoku}%`});BTL.hp(100,100,5);
+  await sleep(auto?200:500);
 }
 async function pBattle(f,W,Sg){
   const b=M.battle;b.g--;
   if(!b.win&&((Sg&&rnd()<.5)||(W&&rnd()<.15))){b.win=true;b.rev=true;}
   if(b.g>0){
-    shake();
-    if(rnd()<(b.win?.6:.4)){b.hpE=Math.max(12,b.hpE-15-rint(20));lcdMsg(`${ATK[b.ally]}!!`,`${CHARS[b.ally].short}の攻撃`);lcdFlash(b.win&&rnd()<.3?4:3);sfx.hit();voice(b.ally,'attack');}
-    else{b.hpA=Math.max(12,b.hpA-15-rint(20));lcdMsg(`${ENEMY_ATK[b.enemy]}!!`,`${CHARS[b.enemy].short}の攻撃`);lcdFlash(1);sfx.damage();voice(b.enemy,'attack');}
-    if(b.g===1)serif(b.win&&rnd()<.3?4:3,b.ally);
+    const mine=rnd()<(b.win?.6:.4),dmg=15+rint(20),lv=mine?(b.win&&rnd()<.35?4:3):2;
+    if(mine){b.hpE=Math.max(12,b.hpE-dmg);voice(b.ally,'attack');lcdFlash(lv);}
+    else{b.hpA=Math.max(12,b.hpA-dmg);voice(b.enemy,'attack');lcdFlash(1);}
+    await BTL.attack(mine?'a':'e',mine?`${ATK[b.ally]}!!`:`${ENEMY_ATK[b.enemy]}!!`,dmg,lv,lv>=4);
+    BTL.hp(b.hpA,b.hpE,b.g);
+    if(b.g===1){serif(b.win&&rnd()<.3?4:3,b.ally);await BTL.clash(auto?600:1300);}
     return;
   }
   await pushPhase(b.win&&rnd()<.2?'決着!!':'PUSH!!',pushStyle(b.win));
+  await BTL.finish(b.win);
   const a=M.at;
   if(b.win){
     b.hpE=0;a.sets++;a.setG=15;
@@ -1288,11 +1440,11 @@ async function pBattle(f,W,Sg){
     else if(!a.upper&&rnd()<.05){const up={50:66,66:75,75:80,80:90,90:90}[a.keizoku]||a.keizoku;if(up>a.keizoku){a.keizoku=up;extra=` 継続率${up}%にUP`;}}
     sfx.big();voice(b.ally,'win');
     await announce({title:b.rev?'逆転勝利!!':(b.byStock?'ストック勝利!!':'勝利!!'),sub:`SET ${a.sets} 継続${extra}`,cls:b.rev?'rainbow':'gold',char:b.ally,ms:2000});
-    M.battle=null;M.mode='AT';
+    M.battle=null;M.mode='AT';BTL.end();
   }else{
     b.hpA=0;sfx.lose();voice(b.enemy,'win')||voice(b.ally,'lose');
     await announce({title:'敗北…',sub:'RUSH終了',cls:'dark',char:b.enemy,ms:1800});
-    M.battle=null;await endAT(false);
+    M.battle=null;BTL.end();await endAT(false);
   }
 }
 const ENDINGS=[
@@ -1358,11 +1510,17 @@ function render(){
   let bg='bg-normal-'+M.kk,ttl='夜霧町',info='',title='',sub='',L='kaito',Rc=null,gauge=null,hp=null;
   switch(M.mode){
     case'NORMAL':ttl='夜霧町';sub={low:'',high:'霊力が高まっている…',super:'夜霧町に異変…!!'}[M.kk];L=M.kk==='low'?'kaito':(M.kk==='high'?'yuki':'ren');break;
-    case'ZENCHO':bg='bg-zencho';ttl='冥界';L='kaito';Rc=M.zc.g<=3?(M.zc.enemy||'jaguard'):null;sub=M.zc.g<=3?'VS 大魔獣':'冥府の都に潜入中…';break;
+    case'ZENCHO':bg='bg-zencho';ttl='冥界';
+      if(M.zc.g<=3&&M.zc.enemy){L=null;Rc=null;sub='';
+        if(!BTL.cur)BTL.start({ally:'kaito',enemy:M.zc.enemy,hpA:M.zc.hpA||100,hpE:M.zc.hpE||100,title:'VS 大魔獣'});
+        BTL.hp(M.zc.hpA||100,M.zc.hpE||100,M.zc.g);
+      }else{L='kaito';Rc=null;sub='冥府の都に潜入中…';}break;
     case'CZ':bg='bg-cz';ttl='霊力解放ZONE';info=`残り ${M.cz.g}G`;L='kaito';Rc='yuki';title='霊力解放';gauge=M.cz.gauge;break;
     case'AT':bg=a.upper?'bg-upper':'bg-at';ttl=a.upper?'真・覚醒RUSH':'REIJIN RUSH';info=`継続${a.keizoku}% ST${a.stock}`;
       title=a.pendingBB?'赤7を狙え!':`残り ${a.setG}G`;sub=`SET ${a.sets}  獲得 ${diff()-a.startDiff>=0?'+':''}${diff()-a.startDiff}枚`;L='kaito';Rc=a.upper?'shion':null;break;
-    case'BATTLE':{const b=M.battle;bg='bg-battle';ttl='決戦バトル';info=`残り ${b.g}G  継続${a.keizoku}%`;L=b.ally;Rc=b.enemy;hp=[b.hpA,b.hpE];sub=`${CHARS[b.ally].short} VS ${CHARS[b.enemy].short}`;break;}
+    case'BATTLE':{const b=M.battle;bg='bg-battle';ttl='決戦バトル';info=`残り ${b.g}G  継続${a.keizoku}%`;L=null;Rc=null;
+      if(!BTL.cur||BTL.cur.enemy!==b.enemy||BTL.cur.ally!==b.ally)BTL.start({ally:b.ally,enemy:b.enemy,hpA:b.hpA,hpE:b.hpE,title:`決戦 継続率${a.keizoku}%`});
+      BTL.hp(b.hpA,b.hpE,b.g);break;}
     case'BONUS':bg='bg-bonus';ttl='覚醒BONUS';info=`残り ${M.bonus.g}G`;title='覚醒BONUS';sub=`純増 ${diff()-M.bonus.startDiff}枚  ストック${a.stock}`;L='kaito';Rc='yuki';break;
     case'TOKKA':bg='bg-tokka';ttl='桜吹雪ラッシュ';info=`残り ${M.tokka.g}G`;title=`+${M.tokka.total}G`;sub=`RUSH残り ${a.setG}G`;L='shion';break;
     case'HIKI':bg='bg-hiki';ttl='反撃ZONE';info=`残り ${M.hiki.g}G`;title='反撃ZONE';sub='引き戻しを狙え!';L='yuki';break;
@@ -1372,6 +1530,7 @@ function render(){
   $('#lcdTtl').textContent=ttl;$('#lcdInfo').textContent=info;
   if(!lcdMsg._t){$('#lcdTitle').textContent=title;$('#lcdSub').textContent=sub;}
   setChar('#chL',L);setChar('#chR',Rc);
+  if(M.mode!=='BATTLE'&&!(M.mode==='ZENCHO'&&M.zc&&M.zc.g<=3&&M.zc.enemy))BTL.end();
   $('#gauge').style.display=gauge==null?'none':'block';if(gauge!=null)$('#gauge i').style.width=gauge+'%';
   $('#hp').style.display=hp?'flex':'none';if(hp){$('#hp .hpa i').style.width=hp[0]+'%';$('#hp .hpe i').style.width=hp[1]+'%';}
 }
